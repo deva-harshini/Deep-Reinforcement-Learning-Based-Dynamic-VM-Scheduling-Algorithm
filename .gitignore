@@ -1,0 +1,15 @@
+target/
+bin/
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+cloudsimplus-master/
+
+# IDE
+.vscode/
+.metadata/
+
+# Secrets / environment files
+.env
+.env.*
