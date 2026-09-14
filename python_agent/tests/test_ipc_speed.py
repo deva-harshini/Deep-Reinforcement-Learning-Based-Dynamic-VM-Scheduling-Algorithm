@@ -93,9 +93,9 @@ def run_ipc_benchmark(num_messages: int = 10000, server_endpoint: str = "tcp://l
     target_throughput = 1000.0
     passed = dropped_messages == 0 and throughput >= target_throughput
     if passed:
-        print(f"✅ PHASE 0 BENCHMARK PASSED: Throughput {throughput:,.2f} msgs/sec > {target_throughput:,.0f} msgs/sec threshold!")
+        print(f"PHASE 0 BENCHMARK PASSED: Throughput {throughput:,.2f} msgs/sec > {target_throughput:,.0f} msgs/sec threshold!")
     else:
-        print(f"❌ PHASE 0 BENCHMARK FAILED: Target was >{target_throughput:,.0f} msgs/sec with 0 drops.")
+        print(f"PHASE 0 BENCHMARK FAILED: Target was >{target_throughput:,.0f} msgs/sec with 0 drops.")
 
     print("=" * 60)
 

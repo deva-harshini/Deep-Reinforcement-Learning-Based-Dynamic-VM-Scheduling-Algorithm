@@ -65,7 +65,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.3.0</version>
                 <configuration>
-                    <mainClass>com.capstone.sim.IpcBenchmarkServer</mainClass>
+                    <mainClass>com.capstone.sim.CloudSimEnvServer</mainClass>
                 </configuration>
             </plugin>
         </plugins>
