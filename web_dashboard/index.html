@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CloudSim DRL Dynamic VM Scheduler | Enterprise Cloud Resource Intelligence</title>
-    <!-- Modern Google Fonts -->
+    <title>CloudSim DRL Engine v2.0 | Enterprise Cloud Telemetry & Autonomous VM Scheduling</title>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN -->
@@ -21,32 +21,26 @@
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
                         display: ['Outfit', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
                     },
                     colors: {
-                        brand: {
-                            50: '#ecfdf5',
-                            100: '#d1fae5',
-                            400: '#34d399',
-                            500: '#10b981',
-                            600: '#059669',
-                            700: '#047857',
-                            900: '#064e3b',
+                        slate: {
+                            950: '#0B0F17',
+                            900: '#111726',
+                            850: '#161B26',
+                            800: '#1E2536',
+                            750: '#262F40',
+                            700: '#333F54',
                         },
-                        dark: {
-                            800: '#1e293b',
-                            850: '#151e2e',
-                            900: '#0f172a',
-                            950: '#090d16',
-                        },
-                        cyber: {
-                            cyan: '#06b6d4',
-                            blue: '#3b82f6',
-                            purple: '#8b5cf6',
-                            amber: '#f59e0b',
-                            rose: '#f43f5e',
+                        status: {
+                            emerald: '#10B981',
+                            amber: '#F59E0B',
+                            rose: '#EF4444',
+                            cyan: '#06B6D4',
+                            purple: '#8B5CF6',
+                            blue: '#3B82F6',
                         }
                     }
                 }
@@ -55,95 +49,135 @@
     </script>
 
     <style>
+        :root {
+            --bg-base: #0B0F17;
+            --card-surface: #161B26;
+            --card-border: #262F40;
+        }
         body {
-            background-color: #090d16;
-            color: #f1f5f9;
+            background-color: var(--bg-base);
+            color: #F1F5F9;
+            font-feature-settings: "cv02", "cv03", "cv04", "cv11";
         }
-        .glass-card {
-            background: rgba(21, 30, 46, 0.75);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        .datadog-card {
+            background-color: var(--card-surface);
+            border: 1px solid var(--card-border);
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
         }
-        .glass-card-hover:hover {
-            border-color: rgba(16, 185, 129, 0.4);
-            box-shadow: 0 0 25px rgba(16, 185, 129, 0.15);
+        .datadog-card:hover {
+            border-color: #3B82F6;
+            box-shadow: 0 0 20px -3px rgba(59, 130, 246, 0.15);
         }
-        .pulse-glow {
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+        .blade-server {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #111726;
+            border: 1px solid #1E2536;
         }
-        .rack-blade {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        .blade-server.active {
+            border-left: 3px solid #10B981;
         }
-        .rack-blade.active {
-            border-left: 4px solid #10b981;
+        .blade-server.sleeping {
+            border-left: 3px solid #475569;
+            opacity: 0.55;
         }
-        .rack-blade.sleeping {
-            border-left: 4px solid #64748b;
-            opacity: 0.65;
+        .blade-server.high-load {
+            border-left: 3px solid #F59E0B;
+            box-shadow: 0 0 15px -2px rgba(245, 158, 11, 0.2);
         }
-        .rack-blade.sla-breach {
-            border-left: 4px solid #f43f5e;
-            box-shadow: 0 0 20px rgba(244, 63, 94, 0.3);
+        .blade-server.sla-breach {
+            border-left: 3px solid #EF4444;
+            box-shadow: 0 0 20px -2px rgba(239, 68, 68, 0.35);
+        }
+        .led-active {
+            box-shadow: 0 0 8px #10B981;
+        }
+        .led-breach {
+            box-shadow: 0 0 10px #EF4444;
+        }
+        .led-high {
+            box-shadow: 0 0 8px #F59E0B;
+        }
+        .migration-pulse {
+            animation: pulse-border 1.5s infinite;
+        }
+        @keyframes pulse-border {
+            0%, 100% { border-color: #06B6D4; box-shadow: 0 0 12px rgba(6, 182, 212, 0.6); }
+            50% { border-color: #3B82F6; box-shadow: 0 0 4px rgba(59, 130, 246, 0.2); }
         }
         /* Custom scrollbar */
         ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
         }
         ::-webkit-scrollbar-track {
-            background: #0f172a;
+            background: #0B0F17;
         }
         ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 3px;
+            background: #262F40;
+            border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #10b981;
+            background: #3B82F6;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col font-sans selection:bg-brand-500 selection:text-white">
+<body class="min-h-screen flex flex-col font-sans selection:bg-blue-600 selection:text-white">
 
-    <!-- Top Navigation / Header -->
-    <header class="border-b border-slate-800 bg-dark-900/90 backdrop-blur-md sticky top-0 z-50 px-6 py-3.5">
-        <div class="max-w-[1700px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+    <!-- Top Navigation Bar -->
+    <header class="border-b border-slate-750 bg-slate-900/95 backdrop-blur-md sticky top-0 z-50 px-6 py-2.5">
+        <div class="max-w-[1780px] mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+            
+            <!-- Branding & System Name -->
             <div class="flex items-center gap-3.5">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-cyber-cyan flex items-center justify-center shadow-lg shadow-brand-500/20">
-                    <i data-lucide="cpu" class="w-6 h-6 text-white"></i>
+                <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                    <i data-lucide="activity" class="w-5 h-5 text-white"></i>
                 </div>
                 <div>
                     <div class="flex items-center gap-2">
-                        <h1 class="font-display font-bold text-xl tracking-tight text-white">CloudSim-DRL</h1>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-brand-500/20 text-brand-400 border border-brand-500/30">v2.0 PRO</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-cyber-purple/20 text-cyber-purple border border-cyber-purple/30">Action-Masked PPO</span>
+                        <span class="font-display font-bold text-lg tracking-tight text-white">CloudSim DRL Engine</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">v2.0 PRO</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Action-Masked PPO</span>
                     </div>
-                    <p class="text-xs text-slate-400">Autonomous Dynamic VM Scheduling & Datacenter Energy Management Platform</p>
+                    <p class="text-[11px] text-slate-400 font-mono">Autonomous VM Consolidation & SPECpower Datacenter Telemetry</p>
                 </div>
             </div>
 
-            <!-- Global Status Bar -->
+            <!-- Status Badges & Quick Stats -->
             <div class="flex items-center gap-3 flex-wrap">
-                <!-- WebSocket Pill -->
-                <div id="ws-status-pill" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-xs font-mono">
-                    <span id="ws-indicator" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span id="ws-label" class="text-slate-300">Live Telemetry</span>
+                <!-- ZeroMQ IPC Badge -->
+                <div class="flex items-center gap-2 px-3 py-1 rounded-md bg-slate-850 border border-slate-750 text-[11px] font-mono">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 led-active animate-pulse"></span>
+                    <span class="text-slate-300">0MQ IPC Online <span class="text-slate-500">(:5555)</span></span>
                 </div>
 
-                <!-- Backend API Status & Config -->
-                <button onclick="openApiConfigModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-xs font-mono transition">
-                    <span id="backend-status-dot" class="w-2.5 h-2.5 rounded-full bg-cyber-cyan"></span>
-                    <span id="backend-status-text" class="text-slate-300">API Endpoint</span>
-                    <i data-lucide="settings" class="w-3.5 h-3.5 text-slate-400"></i>
+                <!-- Active Model Checkpoint Status -->
+                <div class="flex items-center gap-2 px-3 py-1 rounded-md bg-slate-850 border border-slate-750 text-[11px] font-mono">
+                    <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                    <span class="text-slate-300">Model: <span class="text-cyan-400 font-semibold">MaskablePPO Converged</span></span>
+                </div>
+
+                <!-- Live Clock & Uptime -->
+                <div class="flex items-center gap-2 px-3 py-1 rounded-md bg-slate-850 border border-slate-750 text-[11px] font-mono text-slate-400">
+                    <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-500"></i>
+                    <span id="live-clock">00:00:00 UTC</span>
+                </div>
+
+                <!-- API Settings Config -->
+                <button onclick="openApiConfigModal()" class="flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-850 hover:bg-slate-800 border border-slate-750 text-[11px] font-mono text-slate-300 transition">
+                    <i data-lucide="globe" class="w-3.5 h-3.5 text-blue-400"></i>
+                    <span id="api-host-label">API Endpoint</span>
+                    <i data-lucide="settings" class="w-3 h-3 text-slate-500"></i>
                 </button>
 
-                <!-- Action Links -->
-                <a id="swagger-link" href="/docs" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 border border-slate-700 transition">
-                    <i data-lucide="book-open" class="w-3.5 h-3.5 text-cyber-cyan"></i>
-                    <span>API Docs</span>
+                <!-- Swagger Link -->
+                <a id="swagger-link" href="/docs" target="_blank" class="flex items-center gap-1.5 px-3 py-1 rounded-md bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border border-blue-500/20 text-[11px] font-medium transition">
+                    <i data-lucide="file-code-2" class="w-3.5 h-3.5"></i>
+                    <span>Swagger API</span>
                 </a>
 
-                <button onclick="openBenchmarkModal()" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-cyber-purple to-cyber-blue hover:opacity-90 text-xs font-semibold text-white shadow-md shadow-cyber-purple/20 transition">
+                <!-- Benchmark Modal Trigger -->
+                <button onclick="openBenchmarkModal()" class="flex items-center gap-1.5 px-3.5 py-1 rounded-md bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-[11px] font-semibold text-white shadow-md shadow-purple-500/20 transition">
                     <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i>
                     <span>Benchmark Suite</span>
                 </button>
@@ -151,100 +185,100 @@
         </div>
     </header>
 
-    <!-- Main Content Layout -->
-    <main class="flex-1 max-w-[1700px] w-full mx-auto px-6 py-6 space-y-6">
+    <!-- Main Datacenter Operations Canvas -->
+    <main class="flex-1 max-w-[1780px] w-full mx-auto px-6 py-5 space-y-5">
 
-        <!-- Top Metric KPI Banner -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            <!-- Power Card -->
-            <div class="glass-card rounded-2xl p-4 border border-slate-800 flex flex-col justify-between relative overflow-hidden">
+        <!-- Top Executive KPI Ribbon -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+            <!-- Metric 1: Total Power Consumption -->
+            <div class="datadog-card p-4 flex flex-col justify-between relative overflow-hidden">
                 <div class="flex items-center justify-between text-slate-400">
-                    <span class="text-xs font-medium uppercase tracking-wider">Total Power</span>
-                    <i data-lucide="zap" class="w-4 h-4 text-cyber-amber"></i>
+                    <span class="text-[11px] font-mono font-medium uppercase tracking-wider">Datacenter Power</span>
+                    <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
                 </div>
                 <div class="mt-2">
                     <div class="flex items-baseline gap-1.5">
-                        <span id="kpi-power" class="font-display text-2xl lg:text-3xl font-bold text-white">984.4</span>
+                        <span id="kpi-power" class="font-mono text-2xl lg:text-3xl font-bold text-white tracking-tight">984.4</span>
                         <span class="text-xs text-slate-400 font-mono">W</span>
                     </div>
                     <div class="flex items-center gap-1 mt-1 text-[11px] text-emerald-400 font-mono">
-                        <i data-lucide="trending-down" class="w-3 h-3"></i>
+                        <i data-lucide="arrow-down-right" class="w-3 h-3"></i>
                         <span id="kpi-power-saving">38.4% energy saved</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Cumulative Energy -->
-            <div class="glass-card rounded-2xl p-4 border border-slate-800 flex flex-col justify-between">
+            <!-- Metric 2: Cumulative Energy -->
+            <div class="datadog-card p-4 flex flex-col justify-between">
                 <div class="flex items-center justify-between text-slate-400">
-                    <span class="text-xs font-medium uppercase tracking-wider">Energy (kWh)</span>
-                    <i data-lucide="battery-charging" class="w-4 h-4 text-brand-400"></i>
+                    <span class="text-[11px] font-mono font-medium uppercase tracking-wider">Energy (kWh)</span>
+                    <i data-lucide="battery-charging" class="w-4 h-4 text-emerald-400"></i>
                 </div>
                 <div class="mt-2">
                     <div class="flex items-baseline gap-1.5">
-                        <span id="kpi-energy" class="font-display text-2xl lg:text-3xl font-bold text-white">1.646</span>
+                        <span id="kpi-energy" class="font-mono text-2xl lg:text-3xl font-bold text-white tracking-tight">1.646</span>
                         <span class="text-xs text-slate-400 font-mono">kWh</span>
                     </div>
-                    <span class="text-[11px] text-slate-400 font-mono">Horizon Total</span>
+                    <span class="text-[11px] text-slate-400 font-mono">Cumulative Consumption</span>
                 </div>
             </div>
 
-            <!-- SLA Violation Rate -->
-            <div class="glass-card rounded-2xl p-4 border border-slate-800 flex flex-col justify-between">
+            <!-- Metric 3: SLA Violation Rate -->
+            <div class="datadog-card p-4 flex flex-col justify-between">
                 <div class="flex items-center justify-between text-slate-400">
-                    <span class="text-xs font-medium uppercase tracking-wider">SLA Violations</span>
-                    <i data-lucide="shield-alert" class="w-4 h-4 text-cyber-rose"></i>
+                    <span class="text-[11px] font-mono font-medium uppercase tracking-wider">SLA Violation Rate</span>
+                    <i data-lucide="shield-alert" class="w-4 h-4 text-emerald-400"></i>
                 </div>
                 <div class="mt-2">
                     <div class="flex items-baseline gap-1.5">
-                        <span id="kpi-sla" class="font-display text-2xl lg:text-3xl font-bold text-emerald-400">0.00</span>
+                        <span id="kpi-sla" class="font-mono text-2xl lg:text-3xl font-bold text-emerald-400 tracking-tight">0.00</span>
                         <span class="text-xs text-slate-400 font-mono">%</span>
                     </div>
-                    <span class="text-[11px] text-emerald-400 font-medium">✓ Zero-Violation Safe</span>
+                    <span class="text-[11px] text-emerald-400 font-mono font-medium">✓ Zero-Violation Safe</span>
                 </div>
             </div>
 
-            <!-- VM Migrations -->
-            <div class="glass-card rounded-2xl p-4 border border-slate-800 flex flex-col justify-between">
+            <!-- Metric 4: Live VM Migrations -->
+            <div class="datadog-card p-4 flex flex-col justify-between">
                 <div class="flex items-center justify-between text-slate-400">
-                    <span class="text-xs font-medium uppercase tracking-wider">VM Migrations</span>
-                    <i data-lucide="arrow-left-right" class="w-4 h-4 text-cyber-cyan"></i>
+                    <span class="text-[11px] font-mono font-medium uppercase tracking-wider">VM Migrations</span>
+                    <i data-lucide="arrow-left-right" class="w-4 h-4 text-cyan-400"></i>
                 </div>
                 <div class="mt-2">
                     <div class="flex items-baseline gap-1.5">
-                        <span id="kpi-migrations" class="font-display text-2xl lg:text-3xl font-bold text-white">31</span>
+                        <span id="kpi-migrations" class="font-mono text-2xl lg:text-3xl font-bold text-white tracking-tight">31</span>
                         <span class="text-xs text-slate-400 font-mono">total</span>
                     </div>
                     <span class="text-[11px] text-slate-400 font-mono">Low Churn Index</span>
                 </div>
             </div>
 
-            <!-- Active / Sleep Hosts -->
-            <div class="glass-card rounded-2xl p-4 border border-slate-800 flex flex-col justify-between">
+            <!-- Metric 5: Active vs Sleep Hosts -->
+            <div class="datadog-card p-4 flex flex-col justify-between">
                 <div class="flex items-center justify-between text-slate-400">
-                    <span class="text-xs font-medium uppercase tracking-wider">Server States</span>
-                    <i data-lucide="server" class="w-4 h-4 text-cyber-purple"></i>
+                    <span class="text-[11px] font-mono font-medium uppercase tracking-wider">Physical Servers</span>
+                    <i data-lucide="server" class="w-4 h-4 text-purple-400"></i>
                 </div>
                 <div class="mt-2">
                     <div class="flex items-baseline gap-1.5">
-                        <span id="kpi-active-hosts" class="font-display text-2xl lg:text-3xl font-bold text-emerald-400">6</span>
+                        <span id="kpi-active-hosts" class="font-mono text-2xl lg:text-3xl font-bold text-emerald-400 tracking-tight">6</span>
                         <span class="text-xs text-slate-400 font-mono">Active / </span>
-                        <span id="kpi-sleep-hosts" class="font-display text-xl font-bold text-slate-400">4</span>
+                        <span id="kpi-sleep-hosts" class="font-mono text-xl font-bold text-slate-400">4</span>
                         <span class="text-xs text-slate-400 font-mono">Sleep</span>
                     </div>
-                    <span class="text-[11px] text-brand-400 font-mono">Dynamic Consolidation</span>
+                    <span class="text-[11px] text-emerald-400 font-mono">Dynamic Consolidation</span>
                 </div>
             </div>
 
-            <!-- EDP Product -->
-            <div class="glass-card rounded-2xl p-4 border border-slate-800 flex flex-col justify-between">
+            <!-- Metric 6: Energy-Delay Product -->
+            <div class="datadog-card p-4 flex flex-col justify-between">
                 <div class="flex items-center justify-between text-slate-400">
-                    <span class="text-xs font-medium uppercase tracking-wider">EDP Metric</span>
-                    <i data-lucide="gauge" class="w-4 h-4 text-brand-400"></i>
+                    <span class="text-[11px] font-mono font-medium uppercase tracking-wider">EDP Metric</span>
+                    <i data-lucide="gauge" class="w-4 h-4 text-blue-400"></i>
                 </div>
                 <div class="mt-2">
                     <div class="flex items-baseline gap-1.5">
-                        <span id="kpi-edp" class="font-display text-2xl lg:text-3xl font-bold text-white">4.82</span>
+                        <span id="kpi-edp" class="font-mono text-2xl lg:text-3xl font-bold text-white tracking-tight">4.82</span>
                         <span class="text-xs text-slate-400 font-mono">MJ·s</span>
                     </div>
                     <span class="text-[11px] text-slate-400 font-mono">Energy-Delay Product</span>
@@ -252,26 +286,106 @@
             </div>
         </div>
 
-        <!-- Middle Section: Control Hub + 10-Host Physical Rack Visualizer -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- 3-Column Core Workspace: Left Blade Racks (8 cols) + Right Controls & API Inspector (4 cols) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
 
-            <!-- Left 4 Columns: Interactive Simulation Controls & Workload Config -->
-            <div class="lg:col-span-4 space-y-5">
+            <!-- Left 8 Columns: Live Physical Server Racks & VM Allocation Matrix -->
+            <div class="lg:col-span-8 space-y-5">
 
-                <!-- Control Card -->
-                <div class="glass-card rounded-2xl p-5 border border-slate-800 space-y-4">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="sliders" class="w-5 h-5 text-brand-400"></i>
-                            <h2 class="font-display font-semibold text-base text-white">Simulation Controller</h2>
+                <!-- Physical Server Rack Canvas -->
+                <div class="datadog-card p-5 space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-750 pb-3">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="server" class="w-4 h-4 text-emerald-400"></i>
+                                <h2 class="font-display font-bold text-base text-white">Physical Datacenter Racks (10 Blade Hosts)</h2>
+                            </div>
+                            <p class="text-xs text-slate-400 font-mono">Real-time SPECpower load, CPU/RAM utilization, and dynamic power draw gauges</p>
                         </div>
-                        <span id="sim-status-badge" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-slate-800 text-slate-400 border border-slate-700">IDLE</span>
+                        <div class="flex items-center gap-3 text-xs font-mono">
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 led-active"></span>
+                                <span class="text-slate-300">Active (&lt;80%)</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-amber-500 led-high"></span>
+                                <span class="text-amber-400">High Load (&ge;80%)</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-rose-500 led-breach"></span>
+                                <span class="text-rose-400">SLA Breach (&ge;90%)</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-slate-500"></span>
+                                <span class="text-slate-400">Sleep (0W)</span>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Policy Selector -->
+                    <!-- 10-Host Grid (Rack A: Hosts 0-4 | Rack B: Hosts 5-9) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Rack A: High Performance (Quad-Core 3.0GHz, 16GB RAM, 250W) -->
+                        <div class="space-y-2.5">
+                            <div class="flex items-center justify-between px-2 text-xs font-mono text-cyan-400 border-b border-slate-750 pb-1">
+                                <span class="font-bold flex items-center gap-1.5">
+                                    <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
+                                    RACK A: High Performance (Type A)
+                                </span>
+                                <span class="text-[11px] text-slate-400">Quad-Core / 16GB RAM</span>
+                            </div>
+                            <div id="rack-a-blades" class="space-y-2"></div>
+                        </div>
+
+                        <!-- Rack B: Energy Saver (Dual-Core 3.0GHz, 8GB RAM, 180W) -->
+                        <div class="space-y-2.5">
+                            <div class="flex items-center justify-between px-2 text-xs font-mono text-purple-400 border-b border-slate-750 pb-1">
+                                <span class="font-bold flex items-center gap-1.5">
+                                    <i data-lucide="leaf" class="w-3.5 h-3.5"></i>
+                                    RACK B: Energy Saver (Type B)
+                                </span>
+                                <span class="text-[11px] text-slate-400">Dual-Core / 8GB RAM</span>
+                            </div>
+                            <div id="rack-b-blades" class="space-y-2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 20-VM Dynamic Allocation & Live Migration Matrix -->
+                <div class="datadog-card p-5 space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-750 pb-2.5">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="layers" class="w-4 h-4 text-cyan-400"></i>
+                            <h3 class="font-display font-bold text-sm text-white">Dynamic 20-VM Allocation & Live Migration Canvas</h3>
+                        </div>
+                        <div class="flex items-center gap-3 text-[11px] font-mono text-slate-400">
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-cyan-500"></span> Small (2GB, 1000 MIPS)</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-blue-500"></span> Med (4GB, 1200 MIPS)</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-purple-500"></span> Large (4GB, 2000 MIPS)</span>
+                        </div>
+                    </div>
+
+                    <div id="vm-matrix" class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-10 gap-2"></div>
+                </div>
+
+            </div>
+
+            <!-- Right 4 Columns: Simulation Controller & Live REST API Inspector -->
+            <div class="lg:col-span-4 space-y-5">
+
+                <!-- Control Panel Card -->
+                <div class="datadog-card p-5 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-750 pb-3">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="sliders" class="w-4 h-4 text-blue-400"></i>
+                            <h3 class="font-display font-bold text-sm text-white">Simulation Controller</h3>
+                        </div>
+                        <span id="sim-status-badge" class="px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold bg-slate-800 text-slate-400 border border-slate-700">IDLE</span>
+                    </div>
+
+                    <!-- Scheduling Policy -->
                     <div>
-                        <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-1.5">Scheduling Policy</label>
-                        <select id="policy-select" class="w-full bg-dark-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-brand-500 transition font-sans">
+                        <label class="block text-[11px] font-mono font-medium text-slate-400 uppercase tracking-wider mb-1.5">Scheduling Algorithm</label>
+                        <select id="policy-select" class="w-full bg-slate-900 border border-slate-750 rounded-lg px-3 py-2 text-xs font-sans text-slate-200 focus:outline-none focus:border-blue-500 transition">
                             <option value="MaskablePPO (Trained DRL Agent)">🧠 MaskablePPO (Trained DRL Agent) - Ours</option>
                             <option value="First-Fit Consolidation Heuristic">📦 First-Fit Consolidation Heuristic</option>
                             <option value="Minimum Migration Time (MMT)">⚡ Minimum Migration Time (MMT)</option>
@@ -281,179 +395,108 @@
                         </select>
                     </div>
 
-                    <!-- Workload Pattern -->
+                    <!-- Workload Profile Pattern -->
                     <div>
-                        <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-1.5">Workload Surge Profile</label>
-                        <select id="workload-select" class="w-full bg-dark-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-brand-500 transition">
-                            <option value="sinusoidal">🌊 Sinusoidal Cyclic Waves (Nominal Load)</option>
-                            <option value="surge">⚡ Sudden Surge & Flash Crowds (SLA Stress Test)</option>
+                        <label class="block text-[11px] font-mono font-medium text-slate-400 uppercase tracking-wider mb-1.5">Workload Profile Pattern</label>
+                        <select id="workload-select" class="w-full bg-slate-900 border border-slate-750 rounded-lg px-3 py-2 text-xs font-sans text-slate-200 focus:outline-none focus:border-blue-500 transition">
+                            <option value="sinusoidal">🌊 Sinusoidal Cyclic Wave (Nominal Load)</option>
+                            <option value="surge">⚡ Sudden Surge & Flash Crowd (SLA Stress Test)</option>
                             <option value="stochastic">🎲 Stochastic Gaussian Variance</option>
                             <option value="linear">📈 Continuous Linear Ramp-Up</option>
                         </select>
                     </div>
 
-                    <!-- Observation Noise Slider -->
+                    <!-- Telemetric Noise Slider -->
                     <div>
-                        <div class="flex justify-between items-center text-xs mb-1">
-                            <span class="font-medium text-slate-400 uppercase tracking-wider">Telemetric Noise (σ)</span>
-                            <span id="noise-display" class="font-mono text-brand-400 font-semibold">0% (Ideal)</span>
+                        <div class="flex justify-between items-center text-[11px] font-mono mb-1">
+                            <span class="text-slate-400 uppercase">Telemetric Noise (σ)</span>
+                            <span id="noise-display" class="text-cyan-400 font-bold">0% (Ideal Telemetry)</span>
                         </div>
-                        <input id="noise-slider" type="range" min="0" max="0.15" step="0.05" value="0.0" class="w-full h-2 bg-dark-900 rounded-lg appearance-none cursor-pointer accent-brand-500" oninput="updateNoiseDisplay(this.value)">
+                        <input id="noise-slider" type="range" min="0" max="0.15" step="0.05" value="0.0" class="w-full h-1.5 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-blue-500" oninput="updateNoiseDisplay(this.value)">
                         <div class="flex justify-between text-[10px] font-mono text-slate-500 mt-1">
                             <span>0% (Ideal)</span>
-                            <span>5% (Sensor Noise)</span>
-                            <span>15% (Severe Delay)</span>
+                            <span>5% (Sensor Jitter)</span>
+                            <span>15% (Delayed)</span>
                         </div>
                     </div>
 
-                    <!-- Duration & Speed Controls -->
+                    <!-- Steps & Interval Throttle -->
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Duration (Steps)</label>
-                            <input id="steps-input" type="number" value="100" min="20" max="500" class="w-full bg-dark-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-brand-500">
+                            <label class="block text-[11px] font-mono text-slate-400 mb-1">Steps (10s/step)</label>
+                            <input id="steps-input" type="number" value="100" min="20" max="500" class="w-full bg-slate-900 border border-slate-750 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-200 focus:outline-none focus:border-blue-500">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1">Stream Delay (ms)</label>
-                            <input id="delay-input" type="number" value="40" min="5" max="300" class="w-full bg-dark-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-brand-500">
+                            <label class="block text-[11px] font-mono text-slate-400 mb-1">Delay Throttle (ms)</label>
+                            <input id="delay-input" type="number" value="40" min="5" max="300" class="w-full bg-slate-900 border border-slate-750 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-200 focus:outline-none focus:border-blue-500">
                         </div>
                     </div>
 
-                    <!-- Buttons -->
-                    <div class="pt-2 flex gap-3">
-                        <button id="btn-start" onclick="startSimulation()" class="flex-1 bg-gradient-to-r from-brand-600 to-emerald-500 hover:from-brand-500 hover:to-emerald-400 text-white font-semibold py-2.5 rounded-xl shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2 transition">
-                            <i data-lucide="play" class="w-4 h-4 fill-current"></i>
-                            <span>Start Run</span>
+                    <!-- Action CTAs -->
+                    <div class="pt-2 flex gap-2.5">
+                        <button id="btn-start" onclick="startSimulation()" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-semibold py-2 rounded-lg text-xs shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2 transition">
+                            <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+                            <span>Execute Simulation</span>
                         </button>
-                        <button id="btn-stop" onclick="stopSimulation()" class="px-4 bg-slate-800 hover:bg-slate-700 text-rose-400 font-semibold py-2.5 rounded-xl border border-slate-700 flex items-center justify-center gap-2 transition">
-                            <i data-lucide="square" class="w-4 h-4 fill-current"></i>
+                        <button id="btn-stop" onclick="stopSimulation()" class="px-4 bg-slate-800 hover:bg-slate-750 text-rose-400 font-semibold py-2 rounded-lg text-xs border border-slate-750 flex items-center justify-center gap-1.5 transition">
+                            <i data-lucide="square" class="w-3.5 h-3.5 fill-current"></i>
                             <span>Stop</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Single Step API Inference Tester -->
-                <div class="glass-card rounded-2xl p-5 border border-slate-800 space-y-3">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <!-- Live REST API & Inference Payload Inspector -->
+                <div class="datadog-card p-5 space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-750 pb-2.5">
                         <div class="flex items-center gap-2">
-                            <i data-lucide="terminal" class="w-4 h-4 text-cyber-cyan"></i>
-                            <h3 class="font-display font-semibold text-sm text-white">Client Inference Tester</h3>
+                            <i data-lucide="terminal" class="w-4 h-4 text-cyan-400"></i>
+                            <h3 class="font-display font-bold text-sm text-white">Live API Payload Inspector</h3>
                         </div>
-                        <span class="text-[11px] font-mono text-slate-400">POST /api/v1/predict</span>
+                        <span class="text-[10px] font-mono text-slate-400">POST /api/v1/predict</span>
                     </div>
-                    <p class="text-xs text-slate-400">Evaluate single-step model latency, valid action masks, and host assignment decisions.</p>
+                    <p class="text-xs text-slate-400">Test single-step DRL inference latency, valid action masks, and target host vectors.</p>
 
-                    <div class="flex gap-2">
-                        <button onclick="testInference()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 py-2 rounded-lg border border-slate-700 transition flex items-center justify-center gap-1.5">
-                            <i data-lucide="zap" class="w-3.5 h-3.5 text-cyber-amber"></i>
-                            <span>Test Live Prediction</span>
-                        </button>
+                    <button onclick="testInference()" class="w-full bg-slate-850 hover:bg-slate-800 text-xs font-mono font-medium text-slate-200 py-2 rounded-lg border border-slate-750 transition flex items-center justify-center gap-2">
+                        <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
+                        <span>Sample Live Telemetry & Test Prediction</span>
+                    </button>
+
+                    <div id="inference-result-box" class="bg-slate-950 rounded-lg p-3 border border-slate-800 font-mono text-xs text-slate-300 space-y-2 hidden">
+                        <div class="flex justify-between text-slate-400 text-[10px] border-b border-slate-800 pb-1">
+                            <span class="text-cyan-400">Inference Response (20 VMs)</span>
+                            <span id="inf-latency" class="text-emerald-400 font-bold">Latency: 0.8ms</span>
+                        </div>
+                        <div id="inf-decisions" class="grid grid-cols-5 gap-1 text-center text-[10px]"></div>
                     </div>
-                    <div id="inference-result-box" class="bg-dark-950 rounded-xl p-3 border border-slate-800/80 font-mono text-xs text-slate-300 max-h-32 overflow-y-auto hidden">
-                        <div class="flex justify-between text-slate-400 text-[10px] border-b border-slate-800 pb-1 mb-1.5">
-                            <span>Target Host Decisions (VM 0..19)</span>
-                            <span id="inf-latency" class="text-brand-400">Latency: 0.8ms</span>
-                        </div>
-                        <div id="inf-decisions" class="grid grid-cols-5 gap-1 text-center text-[11px]"></div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Right 8 Columns: Interactive 10-Host Physical Server Rack View -->
-            <div class="lg:col-span-8 space-y-5">
-
-                <!-- Physical Server Rack View -->
-                <div class="glass-card rounded-2xl p-5 border border-slate-800 space-y-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <i data-lucide="server" class="w-5 h-5 text-brand-400"></i>
-                                <h2 class="font-display font-semibold text-base text-white">Physical Datacenter Rack Visualizer (10 Hosts)</h2>
-                            </div>
-                            <p class="text-xs text-slate-400">Live CPU, RAM, Network bandwidth, and dynamic power draw gauges</p>
-                        </div>
-                        <div class="flex items-center gap-3 text-xs font-mono">
-                            <div class="flex items-center gap-1.5">
-                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                                <span class="text-slate-300">Active</span>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
-                                <span class="text-slate-400">Sleeping</span>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-                                <span class="text-rose-400">SLA Breach (&ge;90%)</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 10-Host Blades Grid (Split into Rack A & Rack B) -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="rack-container">
-                        <!-- Left Sub-Rack: Rack A (Hosts 0-4) -->
-                        <div class="space-y-2.5">
-                            <div class="flex items-center justify-between px-2 text-xs font-mono text-cyber-cyan">
-                                <span>RACK A: High Performance (Type A)</span>
-                                <span>Quad-Core 3.0GHz / 16GB RAM</span>
-                            </div>
-                            <div id="rack-a-blades" class="space-y-2"></div>
-                        </div>
-
-                        <!-- Right Sub-Rack: Rack B (Hosts 5-9) -->
-                        <div class="space-y-2.5">
-                            <div class="flex items-center justify-between px-2 text-xs font-mono text-cyber-purple">
-                                <span>RACK B: Energy Saver (Type B)</span>
-                                <span>Dual-Core 3.0GHz / 8GB RAM</span>
-                            </div>
-                            <div id="rack-b-blades" class="space-y-2"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 20-VM Dynamic Allocation & Migration Map -->
-                <div class="glass-card rounded-2xl p-5 border border-slate-800 space-y-3">
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="layers" class="w-4 h-4 text-cyber-cyan"></i>
-                            <h3 class="font-display font-semibold text-sm text-white">Dynamic 20-VM Allocation & Live Migration Matrix</h3>
-                        </div>
-                        <div class="flex items-center gap-3 text-[11px] font-mono text-slate-400">
-                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-blue-500"></span> Small (2GB)</span>
-                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-indigo-500"></span> Med (4GB)</span>
-                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-purple-500"></span> Large (4GB)</span>
-                        </div>
-                    </div>
-
-                    <div id="vm-matrix" class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-10 gap-2"></div>
                 </div>
 
             </div>
         </div>
 
-        <!-- Real-Time Telemetry & Comparison Charts Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Real-Time Power Draw Chart -->
-            <div class="glass-card rounded-2xl p-5 border border-slate-800 space-y-3">
+        <!-- Real-Time Telemetry & Comparison Graphs -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <!-- Graph 1: Power Draw (Watts) vs Static Baseline -->
+            <div class="datadog-card p-5 space-y-3">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <i data-lucide="activity" class="w-4 h-4 text-cyber-amber"></i>
-                        <h3 class="font-display font-semibold text-sm text-white">Live Datacenter Power Draw (Watts)</h3>
+                        <i data-lucide="activity" class="w-4 h-4 text-amber-400"></i>
+                        <h3 class="font-display font-bold text-sm text-white">Datacenter Power Draw (Watts)</h3>
                     </div>
-                    <span class="text-xs font-mono text-slate-400">vs. Static Peak (1250W)</span>
+                    <span class="text-[11px] font-mono text-slate-400">vs. Static Peak (1250W Baseline)</span>
                 </div>
                 <div class="h-64">
                     <canvas id="powerChart"></canvas>
                 </div>
             </div>
 
-            <!-- Host Utilization & Energy Metrics Chart -->
-            <div class="glass-card rounded-2xl p-5 border border-slate-800 space-y-3">
+            <!-- Graph 2: CPU & RAM Utilization Breakdown -->
+            <div class="datadog-card p-5 space-y-3">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <i data-lucide="bar-chart" class="w-4 h-4 text-brand-400"></i>
-                        <h3 class="font-display font-semibold text-sm text-white">Host CPU & RAM Utilization Profile</h3>
+                        <i data-lucide="bar-chart-3" class="w-4 h-4 text-emerald-400"></i>
+                        <h3 class="font-display font-bold text-sm text-white">Host Utilization Spectrum (CPU / RAM)</h3>
                     </div>
-                    <span class="text-xs font-mono text-slate-400">Across 10 Physical Hosts</span>
+                    <span class="text-[11px] font-mono text-slate-400">Across 10 Physical Hosts</span>
                 </div>
                 <div class="h-64">
                     <canvas id="utilizationChart"></canvas>
@@ -465,68 +508,68 @@
 
     <!-- API Config Modal (For Remote Vercel / Netlify Frontend Deployments) -->
     <div id="api-config-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="glass-card bg-dark-900/95 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="datadog-card bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-750 pb-3">
                 <div class="flex items-center gap-2">
-                    <i data-lucide="globe" class="w-5 h-5 text-cyber-cyan"></i>
-                    <h3 class="font-display font-semibold text-base text-white">Backend Connection URL</h3>
+                    <i data-lucide="globe" class="w-5 h-5 text-cyan-400"></i>
+                    <h3 class="font-display font-bold text-base text-white">Backend Connection URL</h3>
                 </div>
-                <button onclick="closeApiConfigModal()" class="w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition">
+                <button onclick="closeApiConfigModal()" class="w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-750 flex items-center justify-center text-slate-400 hover:text-white transition">
                     <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
-            <p class="text-xs text-slate-400">Configure your deployed Render or Railway backend gateway endpoint:</p>
+            <p class="text-xs text-slate-400">Enter your deployed Render, Railway, or local backend URL:</p>
             <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Backend Origin URL</label>
-                <input id="custom-api-input" type="text" placeholder="https://your-backend.onrender.com" class="w-full bg-dark-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-brand-500">
+                <label class="block text-xs font-mono font-medium text-slate-300 mb-1">Backend Origin URL</label>
+                <input id="custom-api-input" type="text" placeholder="https://your-backend.onrender.com" class="w-full bg-slate-950 border border-slate-750 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-blue-500">
             </div>
             <div class="flex justify-end gap-2 pt-2">
-                <button onclick="resetApiBaseUrl()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300">Reset to Current Origin</button>
-                <button onclick="saveApiBaseUrl()" class="px-4 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-xs font-semibold text-white">Save & Reconnect</button>
+                <button onclick="resetApiBaseUrl()" class="px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-750 text-xs font-mono text-slate-300">Reset Current</button>
+                <button onclick="saveApiBaseUrl()" class="px-4 py-1.5 rounded-md bg-blue-600 hover:bg-blue-500 text-xs font-mono font-semibold text-white">Save & Reconnect</button>
             </div>
         </div>
     </div>
 
-    <!-- Multi-Policy Benchmark Comparison Modal -->
+    <!-- Multi-Policy Benchmark Modal -->
     <div id="benchmark-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="glass-card bg-dark-900/95 border border-slate-700 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-6 shadow-2xl">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div class="datadog-card bg-slate-900 border border-slate-700 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-5 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-750 pb-3">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-cyber-purple/20 text-cyber-purple flex items-center justify-center border border-cyber-purple/30">
-                        <i data-lucide="award" class="w-6 h-6"></i>
+                    <div class="w-9 h-9 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
+                        <i data-lucide="award" class="w-5 h-5"></i>
                     </div>
                     <div>
-                        <h2 class="font-display font-bold text-xl text-white">Multi-Heuristic Comparative Benchmark Suite</h2>
-                        <p class="text-xs text-slate-400">Automated evaluation across all 6 scheduling algorithms on identical workload horizons</p>
+                        <h2 class="font-display font-bold text-lg text-white">Multi-Heuristic Comparative Benchmark Suite</h2>
+                        <p class="text-xs text-slate-400 font-mono">Automated side-by-side evaluation across all 6 scheduling algorithms</p>
                     </div>
                 </div>
-                <button onclick="closeBenchmarkModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+                <button onclick="closeBenchmarkModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-750 flex items-center justify-center text-slate-400 hover:text-white transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
 
-            <div class="flex items-center justify-between bg-dark-950 p-4 rounded-2xl border border-slate-800">
-                <div class="text-xs text-slate-300">
-                    <span class="font-semibold text-white">Test Parameters:</span> 50 timesteps per policy, Sinusoidal Workload Wave, 10 Physical Hosts, 20 VMs.
+            <div class="flex items-center justify-between bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                <div class="text-xs text-slate-300 font-mono">
+                    <span class="font-bold text-white">Parameters:</span> 50 steps/policy, Sinusoidal Workload Wave, 10 Physical Hosts, 20 VMs.
                 </div>
-                <button id="btn-run-benchmark" onclick="executeBenchmarkSuite()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-emerald-500 hover:from-brand-500 hover:to-emerald-400 text-xs font-semibold text-white shadow-lg shadow-brand-500/20 transition flex items-center gap-2">
-                    <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+                <button id="btn-run-benchmark" onclick="executeBenchmarkSuite()" class="px-4 py-1.5 rounded-md bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-xs font-mono font-semibold text-white shadow-md shadow-emerald-500/20 transition flex items-center gap-1.5">
+                    <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
                     <span>Run Live Benchmark</span>
                 </button>
             </div>
 
-            <!-- Benchmark Results Table -->
+            <!-- Table -->
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs font-mono">
-                    <thead class="bg-dark-950 text-slate-400 border-b border-slate-800">
+                    <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
                         <tr>
-                            <th class="py-3 px-3">Algorithm / Policy</th>
-                            <th class="py-3 px-3">Avg Power (W)</th>
-                            <th class="py-3 px-3">SLA Viol. (%)</th>
-                            <th class="py-3 px-3">Migrations</th>
-                            <th class="py-3 px-3">Sleep Hosts</th>
-                            <th class="py-3 px-3">EDP (MJ·s)</th>
-                            <th class="py-3 px-3">Verdict</th>
+                            <th class="py-2.5 px-3">Algorithm / Policy</th>
+                            <th class="py-2.5 px-3">Avg Power (W)</th>
+                            <th class="py-2.5 px-3">SLA Viol. (%)</th>
+                            <th class="py-2.5 px-3">Migrations</th>
+                            <th class="py-2.5 px-3">Sleep Hosts</th>
+                            <th class="py-2.5 px-3">EDP (MJ·s)</th>
+                            <th class="py-2.5 px-3">Verdict</th>
                         </tr>
                     </thead>
                     <tbody id="benchmark-table-body" class="divide-y divide-slate-800/60 text-slate-200">
@@ -538,13 +581,13 @@
             </div>
 
             <!-- Benchmark Chart -->
-            <div class="h-64 pt-2">
+            <div class="h-60 pt-2">
                 <canvas id="benchmarkChart"></canvas>
             </div>
         </div>
     </div>
 
-    <!-- JavaScript Application Logic -->
+    <!-- Application Script Logic -->
     <script>
         lucide.createIcons();
 
@@ -552,6 +595,7 @@
         let powerChart = null;
         let utilChart = null;
         let benchmarkChart = null;
+        let prevVmAllocations = {};
 
         // Dynamic API Origin resolution
         function getApiBaseUrl() {
@@ -570,7 +614,13 @@
             return `${wsProto}//${url.host}/ws/telemetry`;
         }
 
-        // Telemetry Chart Data Buffers
+        // Live Clock
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('live-clock').textContent = now.toUTCString().split(' ')[4] + ' UTC';
+        }, 1000);
+
+        // Chart Data Buffers
         const maxChartPoints = 30;
         const timeLabels = [];
         const powerData = [];
@@ -589,16 +639,13 @@
                 socket = new WebSocket(wsUrl);
 
                 socket.onopen = () => {
-                    document.getElementById('ws-indicator').className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse';
+                    document.getElementById('ws-indicator').className = 'w-2 h-2 rounded-full bg-emerald-500 led-active animate-pulse';
                     document.getElementById('ws-label').textContent = 'Live Telemetry: Connected';
-                    document.getElementById('backend-status-dot').className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
-                    document.getElementById('backend-status-text').textContent = 'Backend: Online';
                 };
 
                 socket.onclose = () => {
-                    document.getElementById('ws-indicator').className = 'w-2.5 h-2.5 rounded-full bg-rose-500';
+                    document.getElementById('ws-indicator').className = 'w-2 h-2 rounded-full bg-rose-500';
                     document.getElementById('ws-label').textContent = 'Live Telemetry: Reconnecting...';
-                    document.getElementById('backend-status-dot').className = 'w-2.5 h-2.5 rounded-full bg-amber-500';
                     setTimeout(initWebSocket, 4000);
                 };
 
@@ -646,20 +693,24 @@
             hosts.forEach((h) => {
                 const isBreach = h.is_sla_breach;
                 const isActive = h.status === 'ACTIVE';
-                const statusClass = isBreach ? 'sla-breach' : (isActive ? 'active' : 'sleeping');
-                const badgeColor = isBreach ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' : (isActive ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-slate-700/50 text-slate-400 border-slate-700');
+                const isHigh = h.cpu_percent >= 80.0 && !isBreach;
+                
+                const statusClass = isBreach ? 'sla-breach' : (isHigh ? 'high-load' : (isActive ? 'active' : 'sleeping'));
+                const badgeColor = isBreach ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : (isHigh ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : (isActive ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-slate-800 text-slate-500 border-slate-750'));
 
-                const cpuBarColor = h.cpu_percent >= 90 ? 'bg-rose-500' : (h.cpu_percent >= 70 ? 'bg-amber-500' : 'bg-brand-500');
-                const ramBarColor = h.ram_percent >= 95 ? 'bg-rose-500' : 'bg-cyber-cyan';
+                const ledColor = isBreach ? 'bg-rose-500 led-breach' : (isHigh ? 'bg-amber-500 led-high' : (isActive ? 'bg-emerald-500 led-active' : 'bg-slate-600'));
+                const cpuBarColor = h.cpu_percent >= 90 ? 'bg-rose-500' : (h.cpu_percent >= 80 ? 'bg-amber-500' : 'bg-emerald-500');
+                const ramBarColor = h.ram_percent >= 95 ? 'bg-rose-500' : 'bg-cyan-500';
 
                 const html = `
-                    <div class="rack-blade ${statusClass} bg-dark-900/90 rounded-xl p-3 border border-slate-800 text-xs">
-                        <div class="flex items-center justify-between mb-2">
+                    <div class="blade-server ${statusClass} rounded-lg p-3 text-xs">
+                        <div class="flex items-center justify-between mb-1.5">
                             <div class="flex items-center gap-2">
-                                <span class="font-mono font-bold text-slate-200">Host-${String(h.id).padStart(2, '0')}</span>
-                                <span class="px-1.5 py-0.5 rounded text-[10px] font-mono border ${badgeColor}">${h.status}</span>
+                                <span class="w-2 h-2 rounded-full ${ledColor}"></span>
+                                <span class="font-mono font-bold text-slate-100">Host-${String(h.id).padStart(2, '0')}</span>
+                                <span class="px-1.5 py-0.2 rounded text-[10px] font-mono border ${badgeColor}">${h.status}</span>
                             </div>
-                            <div class="font-mono font-bold ${isActive ? 'text-cyber-amber' : 'text-slate-500'}">${h.power_watts} W</div>
+                            <div class="font-mono font-bold ${isActive ? 'text-amber-400' : 'text-slate-500'}">${h.power_watts} W</div>
                         </div>
 
                         <!-- CPU & RAM Gauges -->
@@ -685,10 +736,10 @@
                         </div>
 
                         <!-- VM Badges on this Host -->
-                        <div class="mt-2.5 flex items-center gap-1 flex-wrap">
+                        <div class="mt-2 flex items-center gap-1 flex-wrap">
                             <span class="text-[10px] text-slate-500 font-mono">VMs (${h.vm_count}):</span>
-                            ${h.vms.map(v => `<span class="px-1.5 py-0.2 rounded bg-slate-800 text-[10px] font-mono text-slate-300 border border-slate-700">#${v}</span>`).join('')}
-                            ${h.vm_count === 0 ? '<span class="text-[10px] text-slate-600 italic">None (Deep Sleep)</span>' : ''}
+                            ${h.vms.map(v => `<span class="px-1.5 py-0.2 rounded bg-slate-800 text-[10px] font-mono text-slate-300 border border-slate-750">#${v}</span>`).join('')}
+                            ${h.vm_count === 0 ? '<span class="text-[10px] text-slate-600 italic">Deep Sleep (0W)</span>' : ''}
                         </div>
                     </div>
                 `;
@@ -707,9 +758,14 @@
         function renderVmMatrix(vms) {
             const container = document.getElementById('vm-matrix');
             container.innerHTML = vms.map(vm => {
-                const color = vm.id < 8 ? 'border-blue-500/40 bg-blue-500/10 text-blue-400' : (vm.id < 16 ? 'border-indigo-500/40 bg-indigo-500/10 text-indigo-400' : 'border-purple-500/40 bg-purple-500/10 text-purple-400');
+                const isMigrated = prevVmAllocations[vm.id] !== undefined && prevVmAllocations[vm.id] !== vm.allocated_host;
+                prevVmAllocations[vm.id] = vm.allocated_host;
+
+                const borderPulse = isMigrated ? 'migration-pulse' : '';
+                const color = vm.id < 8 ? 'border-cyan-500/30 bg-cyan-500/5 text-cyan-400' : (vm.id < 16 ? 'border-blue-500/30 bg-blue-500/5 text-blue-400' : 'border-purple-500/30 bg-purple-500/5 text-purple-400');
+                
                 return `
-                    <div class="rounded-lg p-2 border ${color} text-center text-xs font-mono transition-all duration-300 hover:scale-105">
+                    <div class="rounded-md p-1.5 border ${color} ${borderPulse} text-center text-xs font-mono transition-all duration-200">
                         <div class="font-bold">VM-${String(vm.id).padStart(2, '0')}</div>
                         <div class="text-[10px] text-slate-400 mt-0.5">Host-${vm.allocated_host}</div>
                     </div>
@@ -726,20 +782,20 @@
                     labels: timeLabels,
                     datasets: [
                         {
-                            label: 'Active Policy Power (W)',
+                            label: 'Active DRL Policy Power (W)',
                             data: powerData,
-                            borderColor: '#10b981',
-                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderColor: '#10B981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.08)',
                             fill: true,
                             tension: 0.3,
-                            borderWidth: 2.5,
+                            borderWidth: 2,
                             pointRadius: 0,
                         },
                         {
                             label: 'Static Peak Baseline (1250W)',
                             data: baselineData,
-                            borderColor: '#f43f5e',
-                            borderDash: [5, 5],
+                            borderColor: '#EF4444',
+                            borderDash: [4, 4],
                             borderWidth: 1.5,
                             pointRadius: 0,
                             fill: false,
@@ -751,11 +807,11 @@
                     maintainAspectRatio: false,
                     animation: false,
                     plugins: {
-                        legend: { labels: { color: '#94a3b8', font: { family: 'Inter', size: 11 } } }
+                        legend: { labels: { color: '#94A3B8', font: { family: 'Inter', size: 11 } } }
                     },
                     scales: {
-                        x: { grid: { color: '#1e293b' }, ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } } },
-                        y: { min: 400, max: 1350, grid: { color: '#1e293b' }, ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } } }
+                        x: { grid: { color: '#1E2536' }, ticks: { color: '#64748B', font: { family: 'JetBrains Mono', size: 10 } } },
+                        y: { min: 400, max: 1350, grid: { color: '#1E2536' }, ticks: { color: '#64748B', font: { family: 'JetBrains Mono', size: 10 } } }
                     }
                 }
             });
@@ -769,14 +825,14 @@
                         {
                             label: 'CPU %',
                             data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            backgroundColor: '#10b981',
-                            borderRadius: 4,
+                            backgroundColor: '#10B981',
+                            borderRadius: 3,
                         },
                         {
                             label: 'RAM %',
                             data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            backgroundColor: '#06b6d4',
-                            borderRadius: 4,
+                            backgroundColor: '#06B6D4',
+                            borderRadius: 3,
                         }
                     ]
                 },
@@ -785,11 +841,11 @@
                     maintainAspectRatio: false,
                     animation: false,
                     plugins: {
-                        legend: { labels: { color: '#94a3b8', font: { family: 'Inter', size: 11 } } }
+                        legend: { labels: { color: '#94A3B8', font: { family: 'Inter', size: 11 } } }
                     },
                     scales: {
-                        x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } } },
-                        y: { min: 0, max: 100, grid: { color: '#1e293b' }, ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } } }
+                        x: { grid: { color: '#1E2536' }, ticks: { color: '#94A3B8', font: { family: 'JetBrains Mono', size: 10 } } },
+                        y: { min: 0, max: 100, grid: { color: '#1E2536' }, ticks: { color: '#64748B', font: { family: 'JetBrains Mono', size: 10 } } }
                     }
                 }
             });
@@ -834,7 +890,7 @@
                     total_steps: steps,
                     delay_ms: delay,
                 }));
-                document.getElementById('sim-status-badge').className = 'px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-brand-500/20 text-brand-400 border border-brand-500/30';
+                document.getElementById('sim-status-badge').className = 'px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
                 document.getElementById('sim-status-badge').textContent = 'RUNNING';
             }
         }
@@ -842,14 +898,14 @@
         function stopSimulation() {
             if (socket && socket.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify({ action: 'STOP' }));
-                document.getElementById('sim-status-badge').className = 'px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-slate-800 text-slate-400 border border-slate-700';
+                document.getElementById('sim-status-badge').className = 'px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold bg-slate-800 text-slate-400 border border-slate-700';
                 document.getElementById('sim-status-badge').textContent = 'STOPPED';
             }
         }
 
         function updateNoiseDisplay(val) {
             const pct = Math.round(val * 100);
-            document.getElementById('noise-display').textContent = `${pct}% ${pct === 0 ? '(Ideal)' : (pct === 5 ? '(Noise)' : '(Severe Delay)')}`;
+            document.getElementById('noise-display').textContent = `${pct}% ${pct === 0 ? '(Ideal Telemetry)' : (pct === 5 ? '(Sensor Jitter)' : '(Delayed Telemetry)')}`;
         }
 
         // 5. Client Inference Tester
@@ -876,9 +932,9 @@
 
                 const grid = document.getElementById('inf-decisions');
                 grid.innerHTML = data.actions.map((act, i) => `
-                    <div class="bg-dark-900 p-1 rounded border border-slate-800">
+                    <div class="bg-slate-900 p-1 rounded border border-slate-800">
                         <span class="text-slate-500 text-[9px]">V${i}:</span>
-                        <span class="text-brand-400 font-bold">H${act}</span>
+                        <span class="text-emerald-400 font-bold">H${act}</span>
                     </div>
                 `).join('');
             } catch (err) {
@@ -898,11 +954,11 @@
         async function executeBenchmarkSuite() {
             const btn = document.getElementById('btn-run-benchmark');
             btn.disabled = true;
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Executing Benchmark...</span>`;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>Executing Benchmark...</span>`;
             lucide.createIcons();
 
             const tbody = document.getElementById('benchmark-table-body');
-            tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400 animate-pulse">Running multi-heuristic simulations across all 6 scheduling algorithms (50 steps each)...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400 animate-pulse font-mono">Evaluating all 6 scheduling algorithms across 50 steps...</td></tr>`;
 
             const apiBase = getApiBaseUrl();
             try {
@@ -918,10 +974,10 @@
                 const data = await res.json();
                 renderBenchmarkResults(data.results);
             } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-rose-400">Benchmark execution error: ${err}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-rose-400 font-mono">Benchmark error: ${err}</td></tr>`;
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = `<i data-lucide="play" class="w-4 h-4 fill-current"></i><span>Run Live Benchmark</span>`;
+                btn.innerHTML = `<i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i><span>Run Live Benchmark</span>`;
                 lucide.createIcons();
             }
         }
@@ -930,20 +986,20 @@
             const tbody = document.getElementById('benchmark-table-body');
             tbody.innerHTML = results.map(r => {
                 const isDrl = r.policy.includes('MaskablePPO');
-                const rowClass = isDrl ? 'bg-brand-500/10 font-bold border-brand-500/30' : '';
-                const badge = isDrl ? '<span class="px-2 py-0.5 rounded bg-brand-500/20 text-brand-400 border border-brand-500/30 text-[10px]">★ OPTIMAL</span>' : '<span class="text-slate-500 text-[10px]">Standard</span>';
+                const rowClass = isDrl ? 'bg-blue-500/10 font-bold border-blue-500/20' : '';
+                const badge = isDrl ? '<span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px]">★ OPTIMAL</span>' : '<span class="text-slate-500 text-[10px]">Standard</span>';
 
                 return `
                     <tr class="${rowClass}">
-                        <td class="py-3 px-3 flex items-center gap-2">
+                        <td class="py-2.5 px-3 flex items-center gap-2">
                             <span>${r.policy}</span>
                         </td>
-                        <td class="py-3 px-3 text-cyber-amber">${r.avg_power_watts.toFixed(1)} W</td>
-                        <td class="py-3 px-3 ${r.avg_sla_percent > 0.05 ? 'text-rose-400' : 'text-emerald-400'}">${r.avg_sla_percent.toFixed(2)}%</td>
-                        <td class="py-3 px-3 text-slate-300">${r.total_vm_migrations}</td>
-                        <td class="py-3 px-3 text-cyber-purple">${r.avg_sleeping_hosts}</td>
-                        <td class="py-3 px-3 text-brand-400">${(r.final_edp / 1000000.0).toFixed(2)}</td>
-                        <td class="py-3 px-3">${badge}</td>
+                        <td class="py-2.5 px-3 text-amber-400">${r.avg_power_watts.toFixed(1)} W</td>
+                        <td class="py-2.5 px-3 ${r.avg_sla_percent > 0.05 ? 'text-rose-400' : 'text-emerald-400'}">${r.avg_sla_percent.toFixed(2)}%</td>
+                        <td class="py-2.5 px-3 text-slate-300">${r.total_vm_migrations}</td>
+                        <td class="py-2.5 px-3 text-purple-400">${r.avg_sleeping_hosts}</td>
+                        <td class="py-2.5 px-3 text-cyan-400">${(r.final_edp / 1000000.0).toFixed(2)}</td>
+                        <td class="py-2.5 px-3">${badge}</td>
                     </tr>
                 `;
             }).join('');
@@ -960,10 +1016,10 @@
                     labels: labels,
                     datasets: [
                         {
-                            label: 'Avg Power (Watts)',
+                            label: 'Average Datacenter Power (Watts)',
                             data: powers,
-                            backgroundColor: '#10b981',
-                            borderRadius: 6,
+                            backgroundColor: '#10B981',
+                            borderRadius: 4,
                         }
                     ]
                 },
@@ -971,11 +1027,11 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { labels: { color: '#94a3b8', font: { family: 'Inter', size: 11 } } }
+                        legend: { labels: { color: '#94A3B8', font: { family: 'Inter', size: 11 } } }
                     },
                     scales: {
-                        x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } } },
-                        y: { grid: { color: '#1e293b' }, ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } } }
+                        x: { grid: { color: '#1E2536' }, ticks: { color: '#94A3B8', font: { family: 'JetBrains Mono', size: 10 } } },
+                        y: { grid: { color: '#1E2536' }, ticks: { color: '#64748B', font: { family: 'JetBrains Mono', size: 10 } } }
                     }
                 }
             });
