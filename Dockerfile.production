@@ -1,0 +1,58 @@
+# -----------------------------------------------------------------------------
+# Stage 1: Build Java CloudSimPlus Simulation Server
+# -----------------------------------------------------------------------------
+FROM maven:3.9.6-eclipse-temurin-17 AS java-builder
+
+WORKDIR /build
+
+COPY pom.xml .
+COPY src/ src/
+RUN mvn clean package -DskipTests
+
+# -----------------------------------------------------------------------------
+# Stage 2: Production Python Runtime with OpenJDK 17 Headless
+# -----------------------------------------------------------------------------
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Install system dependencies & OpenJDK 17 for ZeroMQ Java simulation
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openjdk-17-jre-headless \
+    build-essential \
+    libzmq3-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set Java home
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-arm64
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
+
+# Install Python requirements
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir fastapi uvicorn websockets pydantic requests gunicorn
+
+# Copy Java JAR from builder stage
+COPY --from=java-builder /build/target/*.jar /app/app.jar
+COPY --from=java-builder /build/target/dependency-jars/ /app/lib/ 2>/dev/null || true
+
+# Copy Python codebase, models, and dashboard
+COPY python_agent/ python_agent/
+COPY web_backend/ web_backend/
+COPY web_dashboard/ web_dashboard/
+COPY models/ models/
+COPY entrypoint.sh /app/entrypoint.sh
+
+RUN chmod +x /app/entrypoint.sh
+
+# Environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+ENV PORT=8000
+ENV HOST=0.0.0.0
+
+EXPOSE 8000
+EXPOSE 5555
+
+ENTRYPOINT ["/app/entrypoint.sh"]
