@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # Service 1: Java CloudSimPlus Simulation Engine & ZeroMQ IPC Bridge
+  cloudsim-engine:
+    build:
+      context: .
+      dockerfile: Dockerfile.java
+    container_name: cloudsim-simulation-server
+    ports:
+      - "5555:5555"
+    networks:
+      - cloudsim-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 5555 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Service 2: FastAPI Backend Engine & Model Server + Integrated Web Dashboard
+  drl-scheduler-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: drl-scheduler-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - SERVER_ENDPOINT=tcp://cloudsim-engine:5555
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - cloudsim-engine
+    networks:
+      - cloudsim-net
+    restart: unless-stopped
+
+networks:
+  cloudsim-net:
+    driver: bridge
