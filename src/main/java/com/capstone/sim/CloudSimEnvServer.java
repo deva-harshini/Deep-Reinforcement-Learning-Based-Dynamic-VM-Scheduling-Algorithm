@@ -10,10 +10,6 @@ import org.zeromq.ZMQ;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * ZeroMQ REP Server exposing CloudSimPlus DatacenterEnvironment to Python Gymnasium agent.
- * Listens on tcp://localhost:5555 for RESET, STEP, and CLOSE commands.
- */
 public class CloudSimEnvServer {
 
     private static final int PORT = 5555;
@@ -21,7 +17,7 @@ public class CloudSimEnvServer {
 
     public static void main(String[] args) {
         System.out.println("=================================================");
-        System.out.println(" CloudSimPlus Gymnasium Environment Server");
+        System.out.println(" CloudSimPlus Gymnasium Environment Server (Phase 3)");
         System.out.println("=================================================");
 
         DatacenterEnvironment env = new DatacenterEnvironment();
@@ -35,9 +31,7 @@ public class CloudSimEnvServer {
 
             while (!Thread.currentThread().isInterrupted()) {
                 byte[] requestBytes = socket.recv(0);
-                if (requestBytes == null) {
-                    break;
-                }
+                if (requestBytes == null) break;
 
                 String requestStr = new String(requestBytes, ZMQ.CHARSET).trim();
                 String responseJson;
@@ -75,7 +69,6 @@ public class CloudSimEnvServer {
                         }
                     }
                 } catch (Exception e) {
-                    // Fallback for raw benchmark messages or parsing errors
                     DatacenterEnvironment.StepResult result = env.step(new int[DatacenterEnvironment.NUM_VMS]);
                     responseJson = formatStepResponse(result);
                 }
@@ -101,6 +94,10 @@ public class CloudSimEnvServer {
         info.put("power_watts", result.powerWatts());
         info.put("sla_violations", result.slaViolations());
         info.put("migrations", result.migrations());
+        info.put("active_shutdowns", result.activeShutdowns());
+        info.put("edp", result.edp());
+        info.put("sla_percent", result.slaPercent());
+        info.put("total_energy_joules", result.totalEnergyJoules());
         info.put("step", result.step());
         info.put("sim_time", result.simTime());
         response.put("info", info);

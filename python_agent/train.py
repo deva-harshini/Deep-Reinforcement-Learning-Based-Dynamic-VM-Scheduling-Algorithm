@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Phase 2: DRL Agent Implementation & Training (PPO / MaskablePPO)
-Trains a Deep Reinforcement Learning agent for energy-efficient VM scheduling in CloudSimPlus.
-Logs to TensorBoard and saves checkpoints to models/ppo_vm_scheduler/.
+Phase 4 Master Consolidation: DRL Agent Training (MaskablePPO)
+Trains a MaskablePPO Deep Reinforcement Learning agent for dynamic energy-efficient VM scheduling in CloudSimPlus.
+Logs custom datacenter telemetry to TensorBoard and checkpoints model artifacts every 2,500 steps.
 """
 
 import os
@@ -12,11 +12,11 @@ import time
 import numpy as np
 
 # Add project root to sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, PROJECT_ROOT)
 
 from python_agent.env.cloudsim_env import CloudSimEnv
 from sb3_contrib import MaskablePPO
-from sb3_contrib.common.maskable.callbacks import MaskableEvalCallback
 from stable_baselines3.common.callbacks import BaseCallback, CheckpointCallback
 
 
@@ -59,7 +59,7 @@ class DatacenterMetricsCallback(BaseCallback):
             total_sla = sum(self.episode_slas[-self.check_freq:]) if self.episode_slas else 0
             total_migrations = sum(self.episode_migrations[-self.check_freq:]) if self.episode_migrations else 0
 
-            # Log to TensorBoard
+            # Log custom metrics to TensorBoard
             self.logger.record("datacenter/mean_reward", mean_reward)
             self.logger.record("datacenter/mean_power_watts", mean_power)
             self.logger.record("datacenter/total_sla_violations", total_sla)
@@ -70,7 +70,7 @@ class DatacenterMetricsCallback(BaseCallback):
 
             if self.verbose > 0:
                 print(
-                    f"Step {self.n_calls:5d} / {self.locals.get('total_timesteps', 10000)} | "
+                    f"Step {self.n_calls:5d} / {self.locals.get('total_timesteps', 50000)} | "
                     f"Mean Reward: {mean_reward:6.2f} | "
                     f"Avg Power: {mean_power:7.2f} W | "
                     f"SLA Violations: {total_sla:2d} | "
@@ -82,18 +82,21 @@ class DatacenterMetricsCallback(BaseCallback):
 
 
 def train(
-    total_timesteps: int = 10000,
+    total_timesteps: int = 50000,
     server_endpoint: str = "tcp://localhost:5555",
-    log_dir: str = "logs/tensorboard",
-    model_dir: str = "models/ppo_vm_scheduler",
+    log_dir: str = None,
+    model_dir: str = None,
     learning_rate: float = 3e-4,
     n_steps: int = 256,
     batch_size: int = 64,
     gamma: float = 0.99,
     ent_coef: float = 0.01,
 ):
+    log_dir = log_dir or os.path.join(PROJECT_ROOT, "logs", "tensorboard")
+    model_dir = model_dir or os.path.join(PROJECT_ROOT, "models", "ppo_vm_scheduler")
+
     print("=" * 70)
-    print(" Phase 2: DRL Agent Implementation & Training (MaskablePPO)")
+    print(" Phase 4 Master Consolidation: DRL Agent Training (MaskablePPO)")
     print("=" * 70)
     print(f"Target Server:    {server_endpoint}")
     print(f"Total Timesteps:  {total_timesteps:,}")
@@ -107,7 +110,7 @@ def train(
     # Initialize Environment
     env = CloudSimEnv(server_endpoint=server_endpoint)
 
-    # Configure Checkpointing
+    # Configure Checkpointing every 2,500 steps
     checkpoint_callback = CheckpointCallback(
         save_freq=2500,
         save_path=model_dir,
@@ -117,7 +120,7 @@ def train(
     )
     metrics_callback = DatacenterMetricsCallback(check_freq=500, verbose=1)
 
-    # Instantiate MaskablePPO Agent
+    # Instantiate MaskablePPO Agent with custom MLP policy network
     policy_kwargs = dict(net_arch=dict(pi=[128, 128], vf=[128, 128]))
 
     model = MaskablePPO(
@@ -136,7 +139,7 @@ def train(
         verbose=0,
     )
 
-    print(f"[TRAIN] Starting MaskablePPO training for {total_timesteps:,} steps...")
+    print(f"[TRAIN] Starting MaskablePPO master training for {total_timesteps:,} steps...")
     start_time = time.perf_counter()
 
     model.learn(
@@ -152,7 +155,7 @@ def train(
     # Save Final Model Artifact
     final_model_path = os.path.join(model_dir, "ppo_vm_final.zip")
     model.save(final_model_path)
-    print(f"✅ Saved final model to: {final_model_path}")
+    print(f"✅ Saved final master model to: {final_model_path}")
     print("=" * 70)
 
     env.close()
@@ -161,7 +164,7 @@ def train(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train DRL Agent for Dynamic VM Scheduling")
-    parser.add_argument("--timesteps", type=int, default=10000, help="Total training timesteps")
+    parser.add_argument("--timesteps", type=int, default=50000, help="Total training timesteps")
     parser.add_argument("--server", type=str, default="tcp://localhost:5555", help="Java server endpoint")
     args = parser.parse_args()
 

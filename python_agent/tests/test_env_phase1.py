@@ -33,7 +33,7 @@ def test_cloudsim_gymnasium_env(num_steps: int = 100):
     
     assert isinstance(obs, np.ndarray), f"Expected np.ndarray, got {type(obs)}"
     assert obs.dtype == np.float32, f"Expected float32 dtype, got {obs.dtype}"
-    assert obs.shape == (20,), f"Expected shape (20,), got {obs.shape}"
+    assert obs.shape == (40,), f"Expected shape (40,), got {obs.shape}"
     assert np.all((obs >= 0.0) & (obs <= 1.0)), f"Observation values out of bounds: {obs}"
     assert isinstance(info, dict), f"Expected dict info, got {type(info)}"
 
@@ -63,7 +63,7 @@ def test_cloudsim_gymnasium_env(num_steps: int = 100):
 
         # Assertions
         assert isinstance(next_obs, np.ndarray), f"Step {step}: next_obs is not np.ndarray"
-        assert next_obs.shape == (20,), f"Step {step}: next_obs shape is {next_obs.shape}"
+        assert next_obs.shape == (40,), f"Step {step}: next_obs shape is {next_obs.shape}"
         assert next_obs.dtype == np.float32, f"Step {step}: next_obs dtype is {next_obs.dtype}"
         assert np.all((next_obs >= 0.0) & (next_obs <= 1.0)), f"Step {step}: Out-of-bounds observation: {next_obs}"
         assert isinstance(reward, float), f"Step {step}: Reward is not float ({type(reward)})"
@@ -94,7 +94,7 @@ def test_cloudsim_gymnasium_env(num_steps: int = 100):
     print("-" * 70)
     print("[TEST] Testing post-run reset...")
     reset_obs, reset_info = env.reset()
-    assert reset_obs.shape == (20,)
+    assert reset_obs.shape == (40,)
     print("✅ Post-run reset successful!")
 
     # 4. Summary & Verification

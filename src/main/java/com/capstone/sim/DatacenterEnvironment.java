@@ -24,19 +24,14 @@ import org.cloudsimplus.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * CloudSimPlus Datacenter Environment simulating a 10-host, 20-VM power-aware cloud datacenter.
- * Provides reset() and step(action) methods for Gymnasium DRL interaction.
- */
 public class DatacenterEnvironment {
 
     public static final int NUM_HOSTS = 10;
     public static final int NUM_VMS = 20;
-    public static final int OBS_DIM = 20; // 10 CPU + 10 RAM utilizations
+    public static final int OBS_DIM = 40; // 10 CPU + 10 RAM + 10 BW + 10 Task Queue Load
     public static final double STEP_DURATION_SEC = 10.0;
     public static final int MAX_STEPS = 500;
 
-    // Reward function weights: R = -(alpha * Power + beta * SLAViolations + gamma * Migrations)
     private static final double ALPHA_POWER = 0.005;
     private static final double BETA_SLA = 2.0;
     private static final double GAMMA_MIGRATION = 0.5;
@@ -51,9 +46,11 @@ public class DatacenterEnvironment {
 
     private int currentStep;
     private double cumulativeEnergyJoules;
+    private double totalSlaThrottlingSeconds;
+    private double totalExecutionSeconds;
 
     public DatacenterEnvironment() {
-        Log.setLevel(Level.ERROR);
+        Log.setLevel(Level.OFF);
         initializeSimulation();
     }
 
@@ -72,44 +69,28 @@ public class DatacenterEnvironment {
 
         this.currentStep = 0;
         this.cumulativeEnergyJoules = 0.0;
+        this.totalSlaThrottlingSeconds = 0.0;
+        this.totalExecutionSeconds = 0.0;
 
-        // Start simulation entities and warm up
         this.simulation.startSync();
         this.simulation.runFor(1.0);
     }
 
-    /**
-     * Creates 10 power-aware hosts with heterogeneous specifications.
-     * Hosts 0-4: Quad-Core, 10,000 MIPS total, 16 GB RAM (Max 250W, Static 100W)
-     * Hosts 5-9: Dual-Core, 6,000 MIPS total, 8 GB RAM (Max 180W, Static 70W)
-     */
     private List<Host> createHosts() {
         List<Host> list = new ArrayList<>(NUM_HOSTS);
-
         for (int i = 0; i < NUM_HOSTS; i++) {
             List<Pe> peList = new ArrayList<>();
             long ramMb;
-            long bwMbps = 100_000;      // 100 Gbps
-            long storageMb = 10_000_000; // 10 TB
-            double maxPower;
-            double staticPower;
+            long bwMbps = 100_000;
+            long storageMb = 10_000_000;
+            double maxPower, staticPower;
 
             if (i < 5) {
-                // Type A: High capacity quad-core host
-                for (int p = 0; p < 4; p++) {
-                    peList.add(new PeSimple(2500));
-                }
-                ramMb = 16384; // 16 GB
-                maxPower = 250.0;
-                staticPower = 100.0;
+                for (int p = 0; p < 4; p++) peList.add(new PeSimple(2500));
+                ramMb = 16384; maxPower = 250.0; staticPower = 100.0;
             } else {
-                // Type B: Energy-efficient dual-core host
-                for (int p = 0; p < 2; p++) {
-                    peList.add(new PeSimple(3000));
-                }
-                ramMb = 8192; // 8 GB
-                maxPower = 180.0;
-                staticPower = 70.0;
+                for (int p = 0; p < 2; p++) peList.add(new PeSimple(3000));
+                ramMb = 8192; maxPower = 180.0; staticPower = 70.0;
             }
 
             Host host = new HostSimple(ramMb, bwMbps, storageMb, peList);
@@ -118,106 +99,63 @@ public class DatacenterEnvironment {
             host.setId(i);
             list.add(host);
         }
-
         return list;
     }
 
-    /**
-     * Creates 20 VMs with diverse resource requirements.
-     */
     private List<Vm> createVms() {
         List<Vm> list = new ArrayList<>(NUM_VMS);
-
         for (int i = 0; i < NUM_VMS; i++) {
-            int pes;
-            long mips;
-            long ramMb;
-            long bwMbps = 1000;
-            long sizeMb = 10000;
-
-            if (i < 8) {
-                // Small VM
-                pes = 1;
-                mips = 1000;
-                ramMb = 2048;
-            } else if (i < 16) {
-                // Medium VM
-                pes = 2;
-                mips = 1200;
-                ramMb = 4096;
-            } else {
-                // Large VM
-                pes = 2;
-                mips = 2000;
-                ramMb = 4096;
-            }
+            int pes = (i < 8) ? 1 : 2;
+            long mips = (i < 8) ? 1000 : (i < 16 ? 1200 : 2000);
+            long ramMb = (i < 8) ? 2048 : 4096;
 
             Vm vm = new VmSimple(i, mips, pes);
-            vm.setRam(ramMb).setBw(bwMbps).setSize(sizeMb);
+            vm.setRam(ramMb).setBw(1000).setSize(10000);
             vm.setCloudletScheduler(new CloudletSchedulerTimeShared());
             list.add(vm);
         }
-
         return list;
     }
 
-    /**
-     * Creates dynamic workload cloudlets with time-varying CPU demands.
-     */
     private List<Cloudlet> createCloudlets() {
         List<Cloudlet> list = new ArrayList<>(NUM_VMS);
-        long cloudletLength = 1_000_000_000L; // Long running
-
         for (int i = 0; i < NUM_VMS; i++) {
             Vm vm = vmList.get(i);
-            Cloudlet cloudlet = new CloudletSimple(cloudletLength, (int) vm.getNumberOfPes());
+            Cloudlet cloudlet = new CloudletSimple(1_000_000_000L, (int) vm.getNumberOfPes());
             cloudlet.setVm(vm);
 
-            // Dynamic utilization model with periodic workload variations
             final int vmIndex = i;
             UtilizationModelDynamic cpuModel = new UtilizationModelDynamic(0.4);
             cpuModel.setUtilizationUpdateFunction(model -> {
                 double time = simulation.clock();
                 double phase = (vmIndex * Math.PI / 10.0);
                 double period = 100.0 + (vmIndex * 15.0);
-                double base = 0.45;
-                double amplitude = 0.35;
-                double util = base + amplitude * Math.sin(2.0 * Math.PI * time / period + phase);
-                return Math.max(0.1, Math.min(0.95, util));
+                double baseWave = 0.45 + 0.35 * Math.sin(2.0 * Math.PI * time / period + phase);
+                // Stochastic workload noise (+/- 10%) to model sudden cloud traffic surges and spikes
+                double noise = java.util.concurrent.ThreadLocalRandom.current().nextDouble(-0.10, 0.10);
+                double util = baseWave + noise;
+                return Math.max(0.10, Math.min(0.98, util));
             });
 
             cloudlet.setUtilizationModelCpu(cpuModel);
             cloudlet.setUtilizationModelRam(new UtilizationModelFull());
             list.add(cloudlet);
         }
-
         return list;
     }
 
-    /**
-     * Resets the datacenter simulation to initial state.
-     * @return Initial observation vector of size 20 (10 CPU + 10 RAM utilizations).
-     */
     public synchronized StepResult reset() {
         if (simulation != null && simulation.isRunning()) {
             simulation.abort();
         }
         initializeSimulation();
-        double[] observation = getObservation();
-        double totalPower = calculateTotalPowerWatts();
-        return new StepResult(observation, 0.0, false, totalPower, 0, 0, currentStep, simulation.clock());
+        return new StepResult(getObservation(), 0.0, false, calculateTotalPowerWatts(), 0, 0, 0, 0.0, 0.0, 0.0, currentStep, simulation.clock());
     }
 
-    /**
-     * Executes one action step in the datacenter environment.
-     * @param action Target host IDs for each of the 20 VMs.
-     * @return StepResult containing observation, reward, done flag, and metrics.
-     */
     public synchronized StepResult step(int[] action) {
         currentStep++;
         int migrationsCount = 0;
 
-        // 1. Process VM placement / migration actions
         if (action != null && action.length == NUM_VMS) {
             long[] availableRam = new long[NUM_HOSTS];
             double[] availableMips = new double[NUM_HOSTS];
@@ -251,83 +189,82 @@ public class DatacenterEnvironment {
             }
         }
 
-        // 2. Advance CloudSim simulation clock
         simulation.runFor(STEP_DURATION_SEC);
 
-        // 3. Compute real-time datacenter metrics
         double totalPowerWatts = calculateTotalPowerWatts();
         int slaViolations = calculateSlaViolations();
+        int activeShutdowns = calculateActiveShutdowns();
+        
         cumulativeEnergyJoules += totalPowerWatts * STEP_DURATION_SEC;
+        totalExecutionSeconds += STEP_DURATION_SEC * NUM_HOSTS;
+        if (slaViolations > 0) {
+            totalSlaThrottlingSeconds += slaViolations * STEP_DURATION_SEC;
+        }
 
-        // 4. Calculate Scalar Reward Function
-        // R_t = - ( alpha * PowerWatts + beta * SLAViolations + gamma * Migrations )
+        double slaPercent = (totalExecutionSeconds > 0) ? (totalSlaThrottlingSeconds / totalExecutionSeconds) * 100.0 : 0.0;
+        double edp = cumulativeEnergyJoules * (simulation.clock() / currentStep); // Energy-Delay Product
+
         double reward = -(ALPHA_POWER * totalPowerWatts + BETA_SLA * slaViolations + GAMMA_MIGRATION * migrationsCount);
-
-        // 5. Get current observation vector
-        double[] observation = getObservation();
-
-        // 6. Termination condition
         boolean done = currentStep >= MAX_STEPS;
 
         return new StepResult(
-                observation,
-                reward,
-                done,
-                totalPowerWatts,
-                slaViolations,
-                migrationsCount,
-                currentStep,
-                simulation.clock()
+                getObservation(), reward, done, totalPowerWatts, slaViolations,
+                migrationsCount, activeShutdowns, edp, slaPercent, cumulativeEnergyJoules,
+                currentStep, simulation.clock()
         );
     }
 
     /**
-     * Extracts normalized observation vector: [10 Host CPU utils, 10 Host RAM utils].
+     * Extracts 40-dimensional state observation vector across all 10 hosts:
+     * - [0..9]   : Host CPU Utilizations [0.0, 1.0]
+     * - [10..19] : Host RAM Utilizations [0.0, 1.0]
+     * - [20..29] : Host Network Bandwidth Utilizations [0.0, 1.0]
+     * - [30..39] : Host Task Queue Load Ratios (VM count relative to total VMs) [0.0, 1.0]
      */
     private double[] getObservation() {
         double[] obs = new double[OBS_DIM];
         for (int i = 0; i < NUM_HOSTS; i++) {
             Host host = hostList.get(i);
-            // Host CPU utilization in [0.0, 1.0]
-            double cpuUtil = host.getCpuPercentUtilization();
-            obs[i] = Math.max(0.0, Math.min(1.0, cpuUtil));
-
-            // Host RAM utilization in [0.0, 1.0]
-            double ramUtil = host.getRam().getPercentUtilization();
-            obs[NUM_HOSTS + i] = Math.max(0.0, Math.min(1.0, ramUtil));
+            // 1. Host CPU Utilization
+            obs[i] = Math.max(0.0, Math.min(1.0, host.getCpuPercentUtilization()));
+            // 2. Host RAM Utilization
+            obs[10 + i] = Math.max(0.0, Math.min(1.0, host.getRam().getPercentUtilization()));
+            // 3. Host Network Bandwidth Utilization
+            obs[20 + i] = Math.max(0.0, Math.min(1.0, host.getBw().getPercentUtilization()));
+            // 4. Host Task Queue Load Ratio
+            obs[30 + i] = Math.max(0.0, Math.min(1.0, (double) host.getVmList().size() / NUM_VMS));
         }
         return obs;
     }
 
-    /**
-     * Calculates total power draw (in Watts) across all 10 hosts.
-     * Inactive/empty hosts are assumed powered off (0 Watts).
-     */
     private double calculateTotalPowerWatts() {
         double totalPower = 0.0;
         for (Host host : hostList) {
             if (!host.getVmList().isEmpty()) {
-                double cpuUtil = host.getCpuPercentUtilization();
-                totalPower += host.getPowerModel().getPower(cpuUtil);
+                totalPower += host.getPowerModel().getPower(host.getCpuPercentUtilization());
             }
         }
         return totalPower;
     }
 
-    /**
-     * Calculates SLA violations where host CPU demand exceeds SLA threshold.
-     */
     private int calculateSlaViolations() {
         int violations = 0;
         for (Host host : hostList) {
-            if (!host.getVmList().isEmpty()) {
-                double cpuUtil = host.getCpuPercentUtilization();
-                if (cpuUtil >= SLA_CPU_THRESHOLD) {
-                    violations++;
-                }
+            if (!host.getVmList().isEmpty() && host.getCpuPercentUtilization() >= SLA_CPU_THRESHOLD) {
+                violations++;
             }
         }
         return violations;
+    }
+
+    private int calculateActiveShutdowns() {
+        int shutdownCount = 0;
+        for (Host host : hostList) {
+            if (host.getVmList().isEmpty()) {
+                shutdownCount++;
+            }
+        }
+        return shutdownCount;
     }
 
     public synchronized void close() {
@@ -336,17 +273,9 @@ public class DatacenterEnvironment {
         }
     }
 
-    /**
-     * Data structure holding step results.
-     */
     public record StepResult(
-            double[] observation,
-            double reward,
-            boolean done,
-            double powerWatts,
-            int slaViolations,
-            int migrations,
-            int step,
-            double simTime
+            double[] observation, double reward, boolean done, double powerWatts,
+            int slaViolations, int migrations, int activeShutdowns, double edp,
+            double slaPercent, double totalEnergyJoules, int step, double simTime
     ) {}
 }
