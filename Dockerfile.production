@@ -36,8 +36,7 @@ RUN pip install --no-cache-dir fastapi uvicorn websockets pydantic requests guni
 
 # Copy Java JAR and dependencies from builder stage
 COPY --from=java-builder /build/target/*.jar /app/app.jar
-COPY --from=java-builder /build/target/dependency-jars /app/lib/
-
+COPY --from=java-builder /build/target/dependency /app/lib/
 # Copy Python codebase, models, and dashboard
 COPY python_agent/ python_agent/
 COPY web_backend/ web_backend/
