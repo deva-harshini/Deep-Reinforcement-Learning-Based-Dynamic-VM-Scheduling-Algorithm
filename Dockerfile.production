@@ -10,22 +10,22 @@ COPY src/ src/
 RUN mvn clean package -DskipTests
 
 # -----------------------------------------------------------------------------
-# Stage 2: Production Python Runtime with OpenJDK 17 Headless
+# Stage 2: Production Python Runtime with Java Headless JRE
 # -----------------------------------------------------------------------------
 FROM python:3.10-slim
 
 WORKDIR /app
 
-# Install system dependencies & OpenJDK 17 for ZeroMQ Java simulation
+# Install system dependencies & default Java runtime for ZeroMQ Java simulation
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    openjdk-17-jre-headless \
+    default-jre-headless \
     build-essential \
     libzmq3-dev \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Set Java home
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-arm64
+# Automatically set JAVA_HOME dynamically based on default-java symlink
+ENV JAVA_HOME=/usr/lib/jvm/default-java
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 # Install Python requirements
@@ -33,9 +33,9 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --no-cache-dir fastapi uvicorn websockets pydantic requests gunicorn
 
-# Copy Java JAR from builder stage
+# Copy Java JAR and libraries from builder stage
 COPY --from=java-builder /build/target/*.jar /app/app.jar
-COPY --from=java-builder /build/target/dependency-jars/ /app/lib/ 2>/dev/null || true
+COPY --from=java-builder /build/target/dependency-jars /app/lib/
 
 # Copy Python codebase, models, and dashboard
 COPY python_agent/ python_agent/
