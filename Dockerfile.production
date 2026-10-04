@@ -7,12 +7,12 @@ WORKDIR /build
 
 COPY pom.xml .
 COPY src/ src/
-RUN mvn clean package -DskipTests
+RUN mvn clean package dependency:copy-dependencies -DskipTests
 
 # -----------------------------------------------------------------------------
-# Stage 2: Production Python Runtime with Java Headless JRE
+# Stage 2: Production Python Runtime (Python 3.12 + Java JRE)
 # -----------------------------------------------------------------------------
-FROM python:3.10-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
@@ -24,16 +24,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Automatically set JAVA_HOME dynamically based on default-java symlink
+# Dynamic Java path
 ENV JAVA_HOME=/usr/lib/jvm/default-java
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 # Install Python requirements
 COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --no-cache-dir fastapi uvicorn websockets pydantic requests gunicorn
 
-# Copy Java JAR and libraries from builder stage
+# Copy Java JAR and dependencies from builder stage
 COPY --from=java-builder /build/target/*.jar /app/app.jar
 COPY --from=java-builder /build/target/dependency-jars /app/lib/
 
