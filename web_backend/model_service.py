@@ -32,7 +32,7 @@ class ModelService:
             model_path,
             os.path.join(PROJECT_ROOT, "models", "ppo_vm_scheduler", "ppo_vm_final.zip"),
             "/Users/harshini/Capstone Project/models/ppo_vm_scheduler/ppo_vm_final.zip",
-            "/Users/harshini/Downloads/GITAM_Template_CSSE/models/ppo_vm_scheduler/ppo_vm_final.zip",
+            # fallback
         ]
         self.model_path = None
         self.model: Optional[MaskablePPO] = None

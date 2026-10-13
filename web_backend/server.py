@@ -6,6 +6,7 @@ Provides REST APIs, Model Inference, WebSocket Telemetry, and Serves Web Dashboa
 import os
 import sys
 import time
+import json
 import asyncio
 import numpy as np
 from typing import List, Optional, Dict, Any
@@ -32,14 +33,35 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# Enable CORS for Vercel, Netlify, and custom enterprise domains
+# ---------------------------------------------------------------------------
+# CORS Configuration: Explicit Vercel, Netlify, Localhost & Wildcards
+# ---------------------------------------------------------------------------
+configured_origins = list(settings.ALLOWED_ORIGINS)
+primary_vercel_origin = "https://deep-reinforcement-learning-based-d.vercel.app"
+if primary_vercel_origin not in configured_origins:
+    configured_origins.insert(0, primary_vercel_origin)
+
+# Common development & staging origins
+local_origins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:8000",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:8000",
+]
+for lo in local_origins:
+    if lo not in configured_origins:
+        configured_origins.append(lo)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS if "*" not in settings.ALLOWED_ORIGINS else ["*"],
-    allow_origin_regex=r"https://.*\.vercel\.app|https://.*\.netlify\.app" if "*" not in settings.ALLOWED_ORIGINS else None,
+    allow_origins=configured_origins,
+    allow_origin_regex=r"^https:\/\/.*\.vercel\.app$|^https:\/\/.*\.netlify\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # ---------------------------------------------------------------------------
@@ -48,10 +70,11 @@ app.add_middleware(
 
 class SimulateRequest(BaseModel):
     policy: str = Field("MaskablePPO (Trained DRL Agent)", description="Scheduling algorithm")
-    workload_pattern: str = Field("sinusoidal", description="Workload profile: sinusoidal, stochastic, surge, linear")
+    workload_pattern: str = Field("sinusoidal", description="Workload profile: sinusoidal, stochastic, surge, linear, custom")
     noise_std: float = Field(0.0, ge=0.0, le=0.5, description="Gaussian telemetric noise standard deviation")
     total_steps: int = Field(100, ge=10, le=500, description="Simulation duration in timesteps (10s per step)")
     delay_ms: int = Field(35, ge=0, le=500, description="Inter-step streaming delay in milliseconds")
+    custom_workload: Optional[List[float]] = Field(None, description="Custom uploaded CPU utilization trace sequence")
 
 
 class PredictRequest(BaseModel):
@@ -70,7 +93,7 @@ class BenchmarkRequest(BaseModel):
 # REST API Endpoints
 # ---------------------------------------------------------------------------
 
-@app.get("/api/v1/health", tags=["System Health"])
+@app.api_route("/api/v1/health", methods=["GET", "HEAD"], tags=["System Health"])
 async def health_check():
     """Returns system status, active model weights, and IPC socket bridge condition."""
     return {
@@ -104,6 +127,7 @@ async def trigger_simulation(req: SimulateRequest, background_tasks: BackgroundT
         noise_std=req.noise_std,
         total_steps=req.total_steps,
         delay_ms=req.delay_ms,
+        custom_workload=req.custom_workload,
     )
 
     return {
@@ -211,6 +235,7 @@ async def websocket_telemetry_endpoint(websocket: WebSocket):
                         noise_std=float(cmd.get("noise_std", 0.0)),
                         total_steps=int(cmd.get("total_steps", 100)),
                         delay_ms=int(cmd.get("delay_ms", 35)),
+                        custom_workload=cmd.get("custom_workload"),
                     ))
                 elif action == "STOP":
                     simulation_runner.stop()
@@ -226,7 +251,7 @@ async def websocket_telemetry_endpoint(websocket: WebSocket):
 
 DASHBOARD_DIR = os.path.join(PROJECT_ROOT, "web_dashboard")
 if not os.path.exists(DASHBOARD_DIR):
-    DASHBOARD_DIR = "/Users/harshini/Downloads/GITAM_Template_CSSE/web_dashboard"
+    DASHBOARD_DIR = os.path.join(PROJECT_ROOT, "web_dashboard")
 
 if os.path.exists(DASHBOARD_DIR):
     app.mount("/static", StaticFiles(directory=DASHBOARD_DIR), name="static")

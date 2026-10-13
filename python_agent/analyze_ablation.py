@@ -46,7 +46,7 @@ def compute_statistics(values: List[float]) -> Dict[str, Any]:
 def analyze(json_path: str = None):
     json_path = json_path or os.path.join(PROJECT_ROOT, "logs", "ablation_results.json")
     if not os.path.exists(json_path):
-        json_path = os.path.join("/Users/harshini/Downloads/GITAM_Template_CSSE", "logs", "ablation_results.json")
+        json_path = os.path.join(PROJECT_ROOT, "results", "phase5", "ablation_results.json")
 
     if not os.path.exists(json_path):
         print(f"[ERROR] Ablation results file not found at: {json_path}")

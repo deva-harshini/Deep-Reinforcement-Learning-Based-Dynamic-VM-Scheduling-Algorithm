@@ -77,9 +77,9 @@ def main():
     # 4. Save consolidated logs
     log_dirs = [
         os.path.join(PROJECT_ROOT, "logs"),
-        os.path.join("/Users/harshini/Downloads/GITAM_Template_CSSE", "logs"),
+        # logs
         os.path.join(PROJECT_ROOT, "results", "phase5"),
-        os.path.join("/Users/harshini/Downloads/GITAM_Template_CSSE", "results", "phase5"),
+        # results
     ]
 
     for ld in log_dirs:

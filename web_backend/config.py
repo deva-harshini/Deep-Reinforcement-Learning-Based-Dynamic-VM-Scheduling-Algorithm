@@ -22,17 +22,22 @@ class Settings(BaseModel):
     # Java Simulation Engine IPC Socket
     SERVER_ENDPOINT: str = os.getenv("SERVER_ENDPOINT", "tcp://127.0.0.1:5555")
 
-    # CORS Allowed Origins (Comma-separated or wildcard for Vercel/Netlify)
+    # CORS Allowed Origins (Explicit domains, previews, and wildcard fallback)
     RAW_ALLOWED_ORIGINS: str = os.getenv(
         "ALLOWED_ORIGINS",
-        "http://localhost:3000,http://localhost:8000,http://localhost:5173,https://*.vercel.app,https://*.netlify.app,*"
+        "http://localhost:3000,http://localhost:8000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:8000,http://127.0.0.1:5173,https://deep-reinforcement-learning-based-d.vercel.app,https://*.vercel.app,https://*.netlify.app,*"
     )
 
     @property
     def ALLOWED_ORIGINS(self) -> List[str]:
-        if self.RAW_ALLOWED_ORIGINS == "*":
+        if self.RAW_ALLOWED_ORIGINS.strip() == "*":
             return ["*"]
-        return [origin.strip() for origin in self.RAW_ALLOWED_ORIGINS.split(",") if origin.strip()]
+        origins = [origin.strip() for origin in self.RAW_ALLOWED_ORIGINS.split(",") if origin.strip()]
+        # Ensure production Vercel frontend is always explicitly present
+        vercel_origin = "https://deep-reinforcement-learning-based-d.vercel.app"
+        if vercel_origin not in origins and "*" not in origins:
+            origins.append(vercel_origin)
+        return origins
 
 
 settings = Settings()

@@ -47,10 +47,37 @@ class SimulationRunner:
         for dead in dead_connections:
             self.active_connections.discard(dead)
 
-    def generate_workload_state(self, step: int, pattern: str = "sinusoidal", noise_std: float = 0.0) -> np.ndarray:
-        """Generates dynamic 40-feature observation state based on pattern."""
+    def generate_workload_state(
+        self,
+        step: int,
+        pattern: str = "sinusoidal",
+        noise_std: float = 0.0,
+        custom_workload: Optional[List[float]] = None
+    ) -> np.ndarray:
+        """Generates dynamic 40-feature observation state based on pattern or custom trace."""
         obs = np.zeros(40, dtype=np.float32)
         t = float(step)
+
+        # Custom Workload Upload Pattern
+        if pattern == "custom" and custom_workload and len(custom_workload) > 0:
+            target_cpu = float(custom_workload[(step - 1) % len(custom_workload)])
+            if target_cpu > 1.0:
+                target_cpu = target_cpu / 100.0
+            for h in range(10):
+                host_factor = 0.85 + 0.30 * ((h % 5) / 4.0)
+                base_cpu = target_cpu * host_factor
+                if noise_std > 0:
+                    base_cpu += np.random.normal(0, noise_std)
+                cpu_val = float(np.clip(base_cpu, 0.05, 0.98))
+                ram_val = float(np.clip(0.35 + 0.50 * cpu_val, 0.10, 0.95))
+                bw_val = float(np.clip(cpu_val * 0.85, 0.05, 0.95))
+                queue_val = float(np.clip(cpu_val * 0.70, 0.05, 0.90))
+
+                obs[h] = cpu_val
+                obs[10 + h] = ram_val
+                obs[20 + h] = bw_val
+                obs[30 + h] = queue_val
+            return obs
 
         # Host dynamic profiles
         for h in range(10):
@@ -87,6 +114,7 @@ class SimulationRunner:
         noise_std: float = 0.0,
         total_steps: int = 100,
         delay_ms: int = 40,
+        custom_workload: Optional[List[float]] = None,
     ) -> Dict[str, Any]:
         """
         Executes a real-time or fast simulation run, streaming live metrics to clients.
