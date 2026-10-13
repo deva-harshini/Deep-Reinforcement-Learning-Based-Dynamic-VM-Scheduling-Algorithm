@@ -1,0 +1,708 @@
+Phase 5 Execution Log - 2026-09-28T22:57:47.490913
+Git Commit: ddb31b5
+Seeds: [42, 101, 2024, 777, 999]
+Ablation Runtime: 0.81s
+Sensitivity Runtime: 4.93s
+
+Ablation Summary:
+{
+  "FULL_MODEL": {
+    "description": "Full Action-Masked DRL + Multi-Resource Reward + Predictive Tier",
+    "energy_kwh_mean": 1.6459684371948242,
+    "energy_kwh_std": 0.003067080259811577,
+    "energy_kwh_ci95": [
+      1.641710647207523,
+      1.6502262271821255
+    ],
+    "slav_mean": 7.341222444889779e-06,
+    "slav_std": 3.7392512932239243e-06,
+    "slav_ci95": [
+      2.150309469801737e-06,
+      1.2532135419977821e-05
+    ],
+    "migrations_mean": 31.0,
+    "migrations_std": 0.0,
+    "composite_cost_mean": 1.9567025184631348,
+    "composite_cost_std": 0.003212136866393217,
+    "composite_cost_ci95": [
+      1.9522433576231735,
+      1.9611616793030962
+    ],
+    "convergence_steps_mean": 425.0,
+    "p_value_energy": 1.0,
+    "p_value_slav": 1.0,
+    "p_value_cost": 1.0
+  },
+  "NO_ACTION_MASK": {
+    "description": "No Action Masking (Penalty-based R_penalty = -100)",
+    "energy_kwh_mean": 1.6450091123580932,
+    "energy_kwh_std": 0.012351705748141697,
+    "energy_kwh_ci95": [
+      1.6278621958754576,
+      1.6621560288407289
+    ],
+    "slav_mean": 0.001702437853723629,
+    "slav_std": 0.00025701382724022104,
+    "slav_ci95": [
+      0.0013456454624189975,
+      0.0020592302450282603
+    ],
+    "migrations_mean": 3939.8,
+    "migrations_std": 52.7954543497828,
+    "composite_cost_mean": 41.213253021240234,
+    "composite_cost_std": 0.5465275182171021,
+    "composite_cost_ci95": [
+      40.45455119483535,
+      41.97195484764512
+    ],
+    "convergence_steps_mean": 425.0,
+    "p_value_energy": 0.8867006770088058,
+    "p_value_slav": 0.0001904080407326228,
+    "p_value_cost": 1.4068714380331761e-08
+  },
+  "NO_PREDICTIVE": {
+    "description": "No Predictive Tier (Strictly Reactive Telemetry)",
+    "energy_kwh_mean": 1.6459684371948242,
+    "energy_kwh_std": 0.003067080259811577,
+    "energy_kwh_ci95": [
+      1.641710647207523,
+      1.6502262271821255
+    ],
+    "slav_mean": 7.341222444889779e-06,
+    "slav_std": 3.7392512932239243e-06,
+    "slav_ci95": [
+      2.150309469801737e-06,
+      1.2532135419977821e-05
+    ],
+    "migrations_mean": 31.0,
+    "migrations_std": 0.0,
+    "composite_cost_mean": 1.9567025184631348,
+    "composite_cost_std": 0.003212136866393217,
+    "composite_cost_ci95": [
+      1.9522433576231735,
+      1.9611616793030962
+    ],
+    "convergence_steps_mean": 425.0,
+    "p_value_energy": 1.0,
+    "p_value_slav": 1.0,
+    "p_value_cost": 1.0
+  },
+  "SINGLE_RESOURCE_REWARD": {
+    "description": "Single-Resource Reward (CPU Load Only)",
+    "energy_kwh_mean": 1.6459684371948242,
+    "energy_kwh_std": 0.003067080259811577,
+    "energy_kwh_ci95": [
+      1.641710647207523,
+      1.6502262271821255
+    ],
+    "slav_mean": 7.341222444889779e-06,
+    "slav_std": 3.7392512932239243e-06,
+    "slav_ci95": [
+      2.150309469801737e-06,
+      1.2532135419977821e-05
+    ],
+    "migrations_mean": 31.0,
+    "migrations_std": 0.0,
+    "composite_cost_mean": 1.9567025184631348,
+    "composite_cost_std": 0.003212136866393217,
+    "composite_cost_ci95": [
+      1.9522433576231735,
+      1.9611616793030962
+    ],
+    "convergence_steps_mean": 425.0,
+    "p_value_energy": 1.0,
+    "p_value_slav": 1.0,
+    "p_value_cost": 1.0
+  },
+  "HEURISTIC_BASELINE": {
+    "description": "Classical Heuristic (Local Regression + MMT)",
+    "energy_kwh_mean": 0.3472222089767456,
+    "energy_kwh_std": 0.0,
+    "energy_kwh_ci95": [
+      0.3472222089767456,
+      0.3472222089767456
+    ],
+    "slav_mean": 0.0,
+    "slav_std": 0.0,
+    "slav_ci95": [
+      0.0,
+      0.0
+    ],
+    "migrations_mean": 0.0,
+    "migrations_std": 0.0,
+    "composite_cost_mean": 0.3472222089767456,
+    "composite_cost_std": 0.0,
+    "composite_cost_ci95": [
+      0.3472222089767456,
+      0.3472222089767456
+    ],
+    "convergence_steps_mean": 425.0,
+    "p_value_energy": 1.1663545744577422e-11,
+    "p_value_slav": 0.017152419659842075,
+    "p_value_cost": 5.949245365008489e-12
+  }
+}
+
+Sensitivity Summary:
+{
+  "learning_rate": {
+    "1e-05": {
+      "energy_kwh_mean": 1.5639594316482544,
+      "energy_kwh_std": 0.007341039116709352,
+      "energy_kwh_ci95": [
+        1.5537684355869277,
+        1.574150427709581
+      ],
+      "slav_mean": 0.00018856129758747605,
+      "slav_std": 3.108173211166545e-05,
+      "slav_ci95": [
+        0.00014541293609622474,
+        0.00023170965907872736
+      ],
+      "migrations_mean": 979.0,
+      "composite_cost_mean": 11.37281551361084,
+      "composite_cost_std": 0.8102929501301158,
+      "composite_cost_ci95": [
+        10.24794856602832,
+        12.49768246119336
+      ],
+      "convergence_steps_mean": 454.0
+    },
+    "3e-05": {
+      "energy_kwh_mean": 1.5639594316482544,
+      "energy_kwh_std": 0.007341039116709352,
+      "energy_kwh_ci95": [
+        1.5537684355869277,
+        1.574150427709581
+      ],
+      "slav_mean": 0.00018856129758747605,
+      "slav_std": 3.108173211166545e-05,
+      "slav_ci95": [
+        0.00014541293609622474,
+        0.00023170965907872736
+      ],
+      "migrations_mean": 979.0,
+      "composite_cost_mean": 11.37281551361084,
+      "composite_cost_std": 0.8102929501301158,
+      "composite_cost_ci95": [
+        10.24794856602832,
+        12.49768246119336
+      ],
+      "convergence_steps_mean": 442.0
+    },
+    "0.0001": {
+      "energy_kwh_mean": 1.7038500308990479,
+      "energy_kwh_std": 0.00445662599776917,
+      "energy_kwh_ci95": [
+        1.697663242180446,
+        1.7100368196176496
+      ],
+      "slav_mean": 0.00017682381341829805,
+      "slav_std": 6.49092097005072e-05,
+      "slav_ci95": [
+        8.671538464068287e-05,
+        0.0002669322421959132
+      ],
+      "migrations_mean": 938.0,
+      "composite_cost_mean": 11.101532363891602,
+      "composite_cost_std": 0.3504371982417274,
+      "composite_cost_ci95": [
+        10.615047542022866,
+        11.588017185760338
+      ],
+      "convergence_steps_mean": 400.0
+    },
+    "0.0003": {
+      "energy_kwh_mean": 1.7038500308990479,
+      "energy_kwh_std": 0.00445662599776917,
+      "energy_kwh_ci95": [
+        1.697663242180446,
+        1.7100368196176496
+      ],
+      "slav_mean": 0.00017682381341829805,
+      "slav_std": 6.49092097005072e-05,
+      "slav_ci95": [
+        8.671538464068287e-05,
+        0.0002669322421959132
+      ],
+      "migrations_mean": 938.0,
+      "composite_cost_mean": 11.101532363891602,
+      "composite_cost_std": 0.3504371982417274,
+      "composite_cost_ci95": [
+        10.615047542022866,
+        11.588017185760338
+      ],
+      "convergence_steps_mean": 400.0
+    },
+    "0.001": {
+      "energy_kwh_mean": 1.7038500308990479,
+      "energy_kwh_std": 0.00445662599776917,
+      "energy_kwh_ci95": [
+        1.697663242180446,
+        1.7100368196176496
+      ],
+      "slav_mean": 0.00017682381341829805,
+      "slav_std": 6.49092097005072e-05,
+      "slav_ci95": [
+        8.671538464068287e-05,
+        0.0002669322421959132
+      ],
+      "migrations_mean": 938.0,
+      "composite_cost_mean": 11.101532363891602,
+      "composite_cost_std": 0.3504371982417274,
+      "composite_cost_ci95": [
+        10.615047542022866,
+        11.588017185760338
+      ],
+      "convergence_steps_mean": 400.0
+    },
+    "0.01": {
+      "energy_kwh_mean": 1.6863625288009643,
+      "energy_kwh_std": 0.007596636646742513,
+      "energy_kwh_ci95": [
+        1.675816706484057,
+        1.6969083511178715
+      ],
+      "slav_mean": 0.0006119173530304579,
+      "slav_std": 0.000131043384473469,
+      "slav_ci95": [
+        0.0004299999713355001,
+        0.0007938347347254156
+      ],
+      "migrations_mean": 2586.8,
+      "composite_cost_mean": 27.61555404663086,
+      "composite_cost_std": 0.614690404992436,
+      "composite_cost_ci95": [
+        26.76222696355421,
+        28.46888112970751
+      ],
+      "convergence_steps_mean": 467.0
+    }
+  },
+  "discount_factor_gamma": {
+    "0.9": {
+      "energy_kwh_mean": 1.5639594316482544,
+      "energy_kwh_std": 0.007341039116709352,
+      "energy_kwh_ci95": [
+        1.5537684355869277,
+        1.574150427709581
+      ],
+      "slav_mean": 0.00018856129758747605,
+      "slav_std": 3.108173211166545e-05,
+      "slav_ci95": [
+        0.00014541293609622474,
+        0.00023170965907872736
+      ],
+      "migrations_mean": 979.0,
+      "composite_cost_mean": 11.37281551361084,
+      "composite_cost_std": 0.8102929501301158,
+      "composite_cost_ci95": [
+        10.24794856602832,
+        12.49768246119336
+      ],
+      "convergence_steps_mean": 437.0
+    },
+    "0.95": {
+      "energy_kwh_mean": 1.7038500308990479,
+      "energy_kwh_std": 0.00445662599776917,
+      "energy_kwh_ci95": [
+        1.697663242180446,
+        1.7100368196176496
+      ],
+      "slav_mean": 0.00017682381341829805,
+      "slav_std": 6.49092097005072e-05,
+      "slav_ci95": [
+        8.671538464068287e-05,
+        0.0002669322421959132
+      ],
+      "migrations_mean": 938.0,
+      "composite_cost_mean": 11.101532363891602,
+      "composite_cost_std": 0.3504371982417274,
+      "composite_cost_ci95": [
+        10.615047542022866,
+        11.588017185760338
+      ],
+      "convergence_steps_mean": 400.0
+    },
+    "0.98": {
+      "energy_kwh_mean": 1.7038500308990479,
+      "energy_kwh_std": 0.00445662599776917,
+      "energy_kwh_ci95": [
+        1.697663242180446,
+        1.7100368196176496
+      ],
+      "slav_mean": 0.00017682381341829805,
+      "slav_std": 6.49092097005072e-05,
+      "slav_ci95": [
+        8.671538464068287e-05,
+        0.0002669322421959132
+      ],
+      "migrations_mean": 938.0,
+      "composite_cost_mean": 11.101532363891602,
+      "composite_cost_std": 0.3504371982417274,
+      "composite_cost_ci95": [
+        10.615047542022866,
+        11.588017185760338
+      ],
+      "convergence_steps_mean": 400.0
+    },
+    "0.99": {
+      "energy_kwh_mean": 1.7038500308990479,
+      "energy_kwh_std": 0.00445662599776917,
+      "energy_kwh_ci95": [
+        1.697663242180446,
+        1.7100368196176496
+      ],
+      "slav_mean": 0.00017682381341829805,
+      "slav_std": 6.49092097005072e-05,
+      "slav_ci95": [
+        8.671538464068287e-05,
+        0.0002669322421959132
+      ],
+      "migrations_mean": 938.0,
+      "composite_cost_mean": 11.101532363891602,
+      "composite_cost_std": 0.3504371982417274,
+      "composite_cost_ci95": [
+        10.615047542022866,
+        11.588017185760338
+      ],
+      "convergence_steps_mean": 400.0
+    },
+    "0.999": {
+      "energy_kwh_mean": 1.7038500308990479,
+      "energy_kwh_std": 0.00445662599776917,
+      "energy_kwh_ci95": [
+        1.697663242180446,
+        1.7100368196176496
+      ],
+      "slav_mean": 0.00017682381341829805,
+      "slav_std": 6.49092097005072e-05,
+      "slav_ci95": [
+        8.671538464068287e-05,
+        0.0002669322421959132
+      ],
+      "migrations_mean": 938.0,
+      "composite_cost_mean": 11.101532363891602,
+      "composite_cost_std": 0.3504371982417274,
+      "composite_cost_ci95": [
+        10.615047542022866,
+        11.588017185760338
+      ],
+      "convergence_steps_mean": 400.0
+    }
+  },
+  "entropy_coef": {
+    "0.0": {
+      "energy_kwh_mean": 1.657939577102661,
+      "energy_kwh_std": 0.0038657510621880925,
+      "energy_kwh_ci95": [
+        1.6525730542953985,
+        1.6633060999099236
+      ],
+      "slav_mean": 3.3393313026052104e-05,
+      "slav_std": 1.8225143473503466e-05,
+      "slav_ci95": [
+        8.092757831784e-06,
+        5.869386822032021e-05
+      ],
+      "migrations_mean": 215.4,
+      "composite_cost_mean": 3.8152788639068604,
+      "composite_cost_std": 0.21383605950066667,
+      "composite_cost_ci95": [
+        3.5184268235491554,
+        4.112130904264565
+      ],
+      "convergence_steps_mean": 400.0
+    },
+    "0.001": {
+      "energy_kwh_mean": 1.657939577102661,
+      "energy_kwh_std": 0.0038657510621880925,
+      "energy_kwh_ci95": [
+        1.6525730542953985,
+        1.6633060999099236
+      ],
+      "slav_mean": 3.3393313026052104e-05,
+      "slav_std": 1.8225143473503466e-05,
+      "slav_ci95": [
+        8.092757831784e-06,
+        5.869386822032021e-05
+      ],
+      "migrations_mean": 215.4,
+      "composite_cost_mean": 3.8152788639068604,
+      "composite_cost_std": 0.21383605950066667,
+      "composite_cost_ci95": [
+        3.5184268235491554,
+        4.112130904264565
+      ],
+      "convergence_steps_mean": 400.0
+    },
+    "0.01": {
+      "energy_kwh_mean": 1.6683940410614013,
+      "energy_kwh_std": 0.0036294658406064075,
+      "energy_kwh_ci95": [
+        1.6633555347275841,
+        1.6734325473952185
+      ],
+      "slav_mean": 6.26611503006012e-05,
+      "slav_std": 2.7035643226405842e-05,
+      "slav_ci95": [
+        2.5129660649687018e-05,
+        0.0001001926399515154
+      ],
+      "migrations_mean": 404.0,
+      "composite_cost_mean": 5.7146600723266605,
+      "composite_cost_std": 0.21955675852152046,
+      "composite_cost_ci95": [
+        5.409866428571576,
+        6.019453716081745
+      ],
+      "convergence_steps_mean": 400.0
+    },
+    "0.05": {
+      "energy_kwh_mean": 1.75462806224823,
+      "energy_kwh_std": 0.005113094573076722,
+      "energy_kwh_ci95": [
+        1.7475299490483138,
+        1.7617261754481461
+      ],
+      "slav_mean": 0.0003585848327267303,
+      "slav_std": 9.33474893493092e-05,
+      "slav_ci95": [
+        0.00022899774278353397,
+        0.0004881719226699266
+      ],
+      "migrations_mean": 1786.8,
+      "composite_cost_mean": 19.658486938476564,
+      "composite_cost_std": 0.20677905315209727,
+      "composite_cost_ci95": [
+        19.371431593485777,
+        19.94554228346735
+      ],
+      "convergence_steps_mean": 400.0
+    },
+    "0.1": {
+      "energy_kwh_mean": 1.8332970857620239,
+      "energy_kwh_std": 0.00862668279580802,
+      "energy_kwh_ci95": [
+        1.8213213301507662,
+        1.8452728413732815
+      ],
+      "slav_mean": 0.0008978611022680336,
+      "slav_std": 0.00018016837143388763,
+      "slav_ci95": [
+        0.000647747305778496,
+        0.0011479748987575711
+      ],
+      "migrations_mean": 3376.0,
+      "composite_cost_mean": 35.68308334350586,
+      "composite_cost_std": 0.7668023503062378,
+      "composite_cost_ci95": [
+        34.6185910274249,
+        36.747575659586815
+      ],
+      "convergence_steps_mean": 400.0
+    }
+  },
+  "batch_size": {
+    "32": {
+      "energy_kwh_mean": 1.7038500308990479,
+      "energy_kwh_std": 0.00445662599776917,
+      "energy_kwh_ci95": [
+        1.697663242180446,
+        1.7100368196176496
+      ],
+      "slav_mean": 0.00017682381341829805,
+      "slav_std": 6.49092097005072e-05,
+      "slav_ci95": [
+        8.671538464068287e-05,
+        0.0002669322421959132
+      ],
+      "migrations_mean": 938.0,
+      "composite_cost_mean": 11.101532363891602,
+      "composite_cost_std": 0.3504371982417274,
+      "composite_cost_ci95": [
+        10.615047542022866,
+        11.588017185760338
+      ],
+      "convergence_steps_mean": 418.0
+    },
+    "64": {
+      "energy_kwh_mean": 1.7038500308990479,
+      "energy_kwh_std": 0.00445662599776917,
+      "energy_kwh_ci95": [
+        1.697663242180446,
+        1.7100368196176496
+      ],
+      "slav_mean": 0.00017682381341829805,
+      "slav_std": 6.49092097005072e-05,
+      "slav_ci95": [
+        8.671538464068287e-05,
+        0.0002669322421959132
+      ],
+      "migrations_mean": 938.0,
+      "composite_cost_mean": 11.101532363891602,
+      "composite_cost_std": 0.3504371982417274,
+      "composite_cost_ci95": [
+        10.615047542022866,
+        11.588017185760338
+      ],
+      "convergence_steps_mean": 400.0
+    },
+    "128": {
+      "energy_kwh_mean": 1.7038500308990479,
+      "energy_kwh_std": 0.00445662599776917,
+      "energy_kwh_ci95": [
+        1.697663242180446,
+        1.7100368196176496
+      ],
+      "slav_mean": 0.00017682381341829805,
+      "slav_std": 6.49092097005072e-05,
+      "slav_ci95": [
+        8.671538464068287e-05,
+        0.0002669322421959132
+      ],
+      "migrations_mean": 938.0,
+      "composite_cost_mean": 11.101532363891602,
+      "composite_cost_std": 0.3504371982417274,
+      "composite_cost_ci95": [
+        10.615047542022866,
+        11.588017185760338
+      ],
+      "convergence_steps_mean": 400.0
+    },
+    "256": {
+      "energy_kwh_mean": 1.7038500308990479,
+      "energy_kwh_std": 0.00445662599776917,
+      "energy_kwh_ci95": [
+        1.697663242180446,
+        1.7100368196176496
+      ],
+      "slav_mean": 0.00017682381341829805,
+      "slav_std": 6.49092097005072e-05,
+      "slav_ci95": [
+        8.671538464068287e-05,
+        0.0002669322421959132
+      ],
+      "migrations_mean": 938.0,
+      "composite_cost_mean": 11.101532363891602,
+      "composite_cost_std": 0.3504371982417274,
+      "composite_cost_ci95": [
+        10.615047542022866,
+        11.588017185760338
+      ],
+      "convergence_steps_mean": 418.0
+    }
+  },
+  "reward_alpha_beta_ratio": {
+    "0.1": {
+      "energy_kwh_mean": 1.7038500308990479,
+      "energy_kwh_std": 0.00445662599776917,
+      "energy_kwh_ci95": [
+        1.697663242180446,
+        1.7100368196176496
+      ],
+      "slav_mean": 0.00017682381341829805,
+      "slav_std": 6.49092097005072e-05,
+      "slav_ci95": [
+        8.671538464068287e-05,
+        0.0002669322421959132
+      ],
+      "migrations_mean": 938.0,
+      "composite_cost_mean": 11.101532363891602,
+      "composite_cost_std": 0.3504371982417274,
+      "composite_cost_ci95": [
+        10.615047542022866,
+        11.588017185760338
+      ],
+      "convergence_steps_mean": 400.0
+    },
+    "0.5": {
+      "energy_kwh_mean": 1.7038500308990479,
+      "energy_kwh_std": 0.00445662599776917,
+      "energy_kwh_ci95": [
+        1.697663242180446,
+        1.7100368196176496
+      ],
+      "slav_mean": 0.00017682381341829805,
+      "slav_std": 6.49092097005072e-05,
+      "slav_ci95": [
+        8.671538464068287e-05,
+        0.0002669322421959132
+      ],
+      "migrations_mean": 938.0,
+      "composite_cost_mean": 11.101532363891602,
+      "composite_cost_std": 0.3504371982417274,
+      "composite_cost_ci95": [
+        10.615047542022866,
+        11.588017185760338
+      ],
+      "convergence_steps_mean": 400.0
+    },
+    "1.0": {
+      "energy_kwh_mean": 1.7038500308990479,
+      "energy_kwh_std": 0.00445662599776917,
+      "energy_kwh_ci95": [
+        1.697663242180446,
+        1.7100368196176496
+      ],
+      "slav_mean": 0.00017682381341829805,
+      "slav_std": 6.49092097005072e-05,
+      "slav_ci95": [
+        8.671538464068287e-05,
+        0.0002669322421959132
+      ],
+      "migrations_mean": 938.0,
+      "composite_cost_mean": 11.101532363891602,
+      "composite_cost_std": 0.3504371982417274,
+      "composite_cost_ci95": [
+        10.615047542022866,
+        11.588017185760338
+      ],
+      "convergence_steps_mean": 400.0
+    },
+    "2.0": {
+      "energy_kwh_mean": 1.7038500308990479,
+      "energy_kwh_std": 0.00445662599776917,
+      "energy_kwh_ci95": [
+        1.697663242180446,
+        1.7100368196176496
+      ],
+      "slav_mean": 0.00017682381341829805,
+      "slav_std": 6.49092097005072e-05,
+      "slav_ci95": [
+        8.671538464068287e-05,
+        0.0002669322421959132
+      ],
+      "migrations_mean": 938.0,
+      "composite_cost_mean": 11.101532363891602,
+      "composite_cost_std": 0.3504371982417274,
+      "composite_cost_ci95": [
+        10.615047542022866,
+        11.588017185760338
+      ],
+      "convergence_steps_mean": 400.0
+    },
+    "10.0": {
+      "energy_kwh_mean": 1.7038500308990479,
+      "energy_kwh_std": 0.00445662599776917,
+      "energy_kwh_ci95": [
+        1.697663242180446,
+        1.7100368196176496
+      ],
+      "slav_mean": 0.00017682381341829805,
+      "slav_std": 6.49092097005072e-05,
+      "slav_ci95": [
+        8.671538464068287e-05,
+        0.0002669322421959132
+      ],
+      "migrations_mean": 938.0,
+      "composite_cost_mean": 11.101532363891602,
+      "composite_cost_std": 0.3504371982417274,
+      "composite_cost_ci95": [
+        10.615047542022866,
+        11.588017185760338
+      ],
+      "convergence_steps_mean": 400.0
+    }
+  }
+}

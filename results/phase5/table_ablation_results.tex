@@ -1,0 +1,18 @@
+\begin{table*}[t]
+\centering
+\caption{Ablation Study: Performance Impact of Core Algorithmic Components across 5 Random Seeds ($N=5$). $p$-values denote two-tailed Welch's $t$-test comparisons against the proposed \textbf{FULL\_MODEL}.}
+\label{tab:ablation_results}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Configuration / Variant} & \textbf{Energy (kWh) $\downarrow$} & \textbf{SLAV ($\times 10^{-4}$) $\downarrow$} & \textbf{Migrations $\downarrow$} & \textbf{Cost Metric $J$ $\downarrow$} & \textbf{Conv. Step} & \textbf{$p$-value ($J$ vs Full)} \\
+\midrule
+\textbf{FULL\_MODEL} & \textbf{1.646 $\pm$ 0.003} & \textbf{0.073 $\pm$ 0.037} & \textbf{31.0} & \textbf{1.957 $\pm$ 0.003} & \textbf{425} & --- \\
+NO\_ACTION\_MASK & 1.645 $\pm$ 0.012 & 17.024 $\pm$ 2.570 & 3939.8 & 41.213 $\pm$ 0.547 & 425 & \textbf{<0.001} \\
+NO\_PREDICTIVE & 1.646 $\pm$ 0.003 & 0.073 $\pm$ 0.037 & 31.0 & 1.957 $\pm$ 0.003 & 425 & 1.0000 \\
+SINGLE\_RESOURCE\_REWARD & 1.646 $\pm$ 0.003 & 0.073 $\pm$ 0.037 & 31.0 & 1.957 $\pm$ 0.003 & 425 & 1.0000 \\
+HEURISTIC\_BASELINE & 0.347 $\pm$ 0.000 & 0.000 $\pm$ 0.000 & 0.0 & 0.347 $\pm$ 0.000 & 425 & \textbf{<0.001} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}

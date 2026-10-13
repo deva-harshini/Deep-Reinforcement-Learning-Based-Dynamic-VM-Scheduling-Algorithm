@@ -1,0 +1,42 @@
+\begin{table*}[t]
+\centering
+\caption{Hyperparameter Sensitivity Analysis across 5 Random Seeds ($N=5$). Summary of energy consumption, SLA violations, and convergence rate across parameter search ranges.}
+\label{tab:sensitivity_results}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llcccc}
+\toprule
+\textbf{Hyperparameter} & \textbf{Evaluated Range / Value} & \textbf{Energy (kWh) $\downarrow$} & \textbf{SLAV ($\times 10^{-4}$) $\downarrow$} & \textbf{Composite Cost $J$ $\downarrow$} & \textbf{Convergence Steps $\downarrow$} \\
+\midrule
+Learning Rate ($\alpha$) & 1e-05 & 1.564 $\pm$ 0.007 & 1.886 $\pm$ 0.311 & 11.373 $\pm$ 0.810 & 454 \\
+ & 3e-05 & 1.564 $\pm$ 0.007 & 1.886 $\pm$ 0.311 & 11.373 $\pm$ 0.810 & 442 \\
+\textbf{} & \textbf{0.0001} & \textbf{1.704 $\pm$ 0.004} & \textbf{1.768 $\pm$ 0.649} & \textbf{11.102 $\pm$ 0.350} & \textbf{400} \\
+ & 0.0003 & 1.704 $\pm$ 0.004 & 1.768 $\pm$ 0.649 & 11.102 $\pm$ 0.350 & 400 \\
+ & 0.001 & 1.704 $\pm$ 0.004 & 1.768 $\pm$ 0.649 & 11.102 $\pm$ 0.350 & 400 \\
+ & 0.01 & 1.686 $\pm$ 0.008 & 6.119 $\pm$ 1.310 & 27.616 $\pm$ 0.615 & 467 \\
+\midrule
+Discount Factor ($\gamma$) & 0.9 & 1.564 $\pm$ 0.007 & 1.886 $\pm$ 0.311 & 11.373 $\pm$ 0.810 & 437 \\
+\textbf{} & \textbf{0.95} & \textbf{1.704 $\pm$ 0.004} & \textbf{1.768 $\pm$ 0.649} & \textbf{11.102 $\pm$ 0.350} & \textbf{400} \\
+ & 0.98 & 1.704 $\pm$ 0.004 & 1.768 $\pm$ 0.649 & 11.102 $\pm$ 0.350 & 400 \\
+ & 0.99 & 1.704 $\pm$ 0.004 & 1.768 $\pm$ 0.649 & 11.102 $\pm$ 0.350 & 400 \\
+ & 0.999 & 1.704 $\pm$ 0.004 & 1.768 $\pm$ 0.649 & 11.102 $\pm$ 0.350 & 400 \\
+\midrule
+\textbf{Entropy Regularization ($c_{\text{ent}}$)} & \textbf{0.0} & \textbf{1.658 $\pm$ 0.004} & \textbf{0.334 $\pm$ 0.182} & \textbf{3.815 $\pm$ 0.214} & \textbf{400} \\
+ & 0.001 & 1.658 $\pm$ 0.004 & 0.334 $\pm$ 0.182 & 3.815 $\pm$ 0.214 & 400 \\
+ & 0.01 & 1.668 $\pm$ 0.004 & 0.627 $\pm$ 0.270 & 5.715 $\pm$ 0.220 & 400 \\
+ & 0.05 & 1.755 $\pm$ 0.005 & 3.586 $\pm$ 0.933 & 19.658 $\pm$ 0.207 & 400 \\
+ & 0.1 & 1.833 $\pm$ 0.009 & 8.979 $\pm$ 1.802 & 35.683 $\pm$ 0.767 & 400 \\
+\midrule
+\textbf{Mini-batch Size ($B$)} & \textbf{32} & \textbf{1.704 $\pm$ 0.004} & \textbf{1.768 $\pm$ 0.649} & \textbf{11.102 $\pm$ 0.350} & \textbf{418} \\
+ & 64 & 1.704 $\pm$ 0.004 & 1.768 $\pm$ 0.649 & 11.102 $\pm$ 0.350 & 400 \\
+ & 128 & 1.704 $\pm$ 0.004 & 1.768 $\pm$ 0.649 & 11.102 $\pm$ 0.350 & 400 \\
+ & 256 & 1.704 $\pm$ 0.004 & 1.768 $\pm$ 0.649 & 11.102 $\pm$ 0.350 & 418 \\
+\midrule
+\textbf{Reward Ratio ($\alpha_{\text{energy}} / \beta_{\text{SLA}}$)} & \textbf{0.1} & \textbf{1.704 $\pm$ 0.004} & \textbf{1.768 $\pm$ 0.649} & \textbf{11.102 $\pm$ 0.350} & \textbf{400} \\
+ & 0.5 & 1.704 $\pm$ 0.004 & 1.768 $\pm$ 0.649 & 11.102 $\pm$ 0.350 & 400 \\
+ & 1.0 & 1.704 $\pm$ 0.004 & 1.768 $\pm$ 0.649 & 11.102 $\pm$ 0.350 & 400 \\
+ & 2.0 & 1.704 $\pm$ 0.004 & 1.768 $\pm$ 0.649 & 11.102 $\pm$ 0.350 & 400 \\
+ & 10.0 & 1.704 $\pm$ 0.004 & 1.768 $\pm$ 0.649 & 11.102 $\pm$ 0.350 & 400 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
